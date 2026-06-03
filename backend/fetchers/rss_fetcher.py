@@ -58,11 +58,24 @@ def _fetch_full_content(url):
         return None
 
 
+def _fetch_feed(url):
+    try:
+        resp = httpx.get(
+            url,
+            timeout=10,
+            follow_redirects=True,
+            headers={"User-Agent": "Pulse/1.0 RSS Aggregator"},
+        )
+        return feedparser.parse(resp.content)
+    except Exception:
+        return feedparser.parse(url)
+
+
 def fetch_rss(source, db):
     from models import Item
 
     try:
-        feed = feedparser.parse(source.url)
+        feed = _fetch_feed(source.url)
 
         if feed.bozo and not feed.entries:
             return 0, f"Feed parse error: {feed.bozo_exception}"

@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 
 import feedparser
+import httpx
 
 logger = logging.getLogger("pulse.youtube")
 
@@ -10,7 +11,16 @@ def fetch_youtube(source, db):
     from models import Item
 
     try:
-        feed = feedparser.parse(source.url)
+        try:
+            resp = httpx.get(
+                source.url,
+                timeout=10,
+                follow_redirects=True,
+                headers={"User-Agent": "Pulse/1.0 RSS Aggregator"},
+            )
+            feed = feedparser.parse(resp.content)
+        except Exception:
+            feed = feedparser.parse(source.url)
 
         if feed.bozo and not feed.entries:
             return 0, f"Feed parse error: {feed.bozo_exception}"
