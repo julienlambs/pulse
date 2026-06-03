@@ -28,7 +28,7 @@ export default function ArticleCard({ item, sourceName, onRead, onSave }) {
         borderRadius: 12,
         padding: '14px 14px 12px',
         cursor: 'pointer',
-        opacity: item.is_read ? 0.65 : 1,
+        opacity: item.is_read ? 0.5 : 0.8,
         transition: 'opacity 0.15s',
         WebkitTapHighlightColor: 'transparent',
       }}
