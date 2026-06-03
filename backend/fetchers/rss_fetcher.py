@@ -64,21 +64,23 @@ def _fetch_full_content(url):
 
 
 def _fetch_feed(url):
+    kwargs = dict(timeout=10, follow_redirects=True, headers={"User-Agent": "Pulse/1.0 RSS Aggregator"})
     try:
-        resp = httpx.get(
-            url,
-            timeout=10,
-            follow_redirects=True,
-            headers={"User-Agent": "Pulse/1.0 RSS Aggregator"},
-        )
-        if resp.status_code != 200:
-            result = feedparser.parse("")
-            result["bozo"] = True
-            result["bozo_exception"] = Exception(f"HTTP {resp.status_code}")
-            return result
-        return feedparser.parse(resp.content)
+        resp = httpx.get(url, **kwargs)
+    except httpx.ConnectError:
+        try:
+            resp = httpx.get(url, verify=False, **{k: v for k, v in kwargs.items() if k != 'verify'})
+        except Exception:
+            return feedparser.parse(url)
     except Exception:
         return feedparser.parse(url)
+
+    if resp.status_code != 200:
+        result = feedparser.parse("")
+        result["bozo"] = True
+        result["bozo_exception"] = Exception(f"HTTP {resp.status_code}")
+        return result
+    return feedparser.parse(resp.content)
 
 
 def fetch_rss(source, db):
