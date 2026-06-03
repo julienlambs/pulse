@@ -45,12 +45,11 @@ def _detect_lang(text):
 def _fetch_full_content(url):
     try:
         from readability import Document
-        resp = httpx.get(
-            url,
-            timeout=8,
-            follow_redirects=True,
-            headers={"User-Agent": "Mozilla/5.0 (compatible; Pulse/1.0)"},
-        )
+        kwargs = dict(timeout=8, follow_redirects=True, headers={"User-Agent": "Mozilla/5.0 (compatible; Pulse/1.0)"})
+        try:
+            resp = httpx.get(url, **kwargs)
+        except httpx.ConnectError:
+            resp = httpx.get(url, verify=False, **kwargs)
         if resp.status_code != 200:
             return None
         doc = Document(resp.text)

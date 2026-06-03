@@ -85,9 +85,11 @@ export default function Reader({ item, sourceName, onBack, onSaveUpdate }) {
         </button>
         <button
           onClick={handleSave}
-          style={{ ...BTN, color: saved ? 'var(--accent)' : 'var(--muted)', fontSize: 18 }}
+          style={{ ...BTN, color: saved ? 'var(--accent)' : 'var(--muted)' }}
         >
-          🔖
+          <svg width="14" height="17" viewBox="0 0 13 16" fill={saved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1.5 1.5h10v13l-5-3-5 3V1.5z"/>
+          </svg>
         </button>
         <a
           href={item.url}

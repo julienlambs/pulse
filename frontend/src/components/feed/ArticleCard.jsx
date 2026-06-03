@@ -24,7 +24,7 @@ export default function ArticleCard({ item, sourceName, onRead, onSave }) {
       onClick={handleClick}
       style={{
         background: 'var(--card)',
-        border: '1px solid var(--border)',
+        border: item.is_saved ? '1px solid rgba(96,80,220,0.35)' : '1px solid var(--border)',
         borderRadius: 12,
         padding: '14px 14px 12px',
         cursor: 'pointer',
@@ -74,7 +74,6 @@ export default function ArticleCard({ item, sourceName, onRead, onSave }) {
             background: 'none',
             border: 'none',
             cursor: 'pointer',
-            fontSize: 16,
             color: item.is_saved ? 'var(--accent)' : 'var(--muted)',
             padding: '2px 4px',
             lineHeight: 1,
@@ -82,7 +81,9 @@ export default function ArticleCard({ item, sourceName, onRead, onSave }) {
             WebkitTapHighlightColor: 'transparent',
           }}
         >
-          🔖
+          <svg width="13" height="16" viewBox="0 0 13 16" fill={item.is_saved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1.5 1.5h10v13l-5-3-5 3V1.5z"/>
+          </svg>
         </button>
       </div>
 
