@@ -20,6 +20,7 @@ def _source_to_dict(source: Source):
         "url": source.url,
         "tab": source.tab,
         "keywords": source.keywords,
+        "exclude_keywords": source.exclude_keywords,
         "lang_filter": source.lang_filter,
         "is_active": source.is_active,
         "last_fetched_at": source.last_fetched_at.isoformat() if source.last_fetched_at else None,
@@ -63,6 +64,7 @@ def create_source(body: dict, db: Session = Depends(get_db)):
         url=body["url"],
         tab=body["tab"],
         keywords=body.get("keywords"),
+        exclude_keywords=body.get("exclude_keywords"),
         lang_filter=body.get("lang_filter", "all"),
         is_active=body.get("is_active", True),
     )
@@ -77,7 +79,7 @@ def update_source(source_id: int, body: dict, db: Session = Depends(get_db)):
     source = db.query(Source).filter(Source.id == source_id).first()
     if not source:
         raise HTTPException(status_code=404, detail="Source not found")
-    for field in ["name", "type", "url", "tab", "keywords", "lang_filter", "is_active"]:
+    for field in ["name", "type", "url", "tab", "keywords", "exclude_keywords", "lang_filter", "is_active"]:
         if field in body:
             setattr(source, field, body[field])
     db.commit()

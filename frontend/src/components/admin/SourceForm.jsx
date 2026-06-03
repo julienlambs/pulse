@@ -46,8 +46,9 @@ export default function SourceForm({ source, token, onSave, onClose }) {
     type:        source?.type        || 'rss',
     url:         source?.url         || '',
     tab:         source?.tab         || 'ai_product',
-    keywords:    source?.keywords    ? JSON.parse(source.keywords).join(', ') : '',
-    lang_filter: source?.lang_filter || 'all',
+    keywords:         source?.keywords         ? JSON.parse(source.keywords).join(', ')         : '',
+    exclude_keywords: source?.exclude_keywords ? JSON.parse(source.exclude_keywords).join(', ') : '',
+    lang_filter:      source?.lang_filter      || 'all',
   })
   const [saving, setSaving]       = useState(false)
   const [testing, setTesting]     = useState(false)
@@ -121,6 +122,9 @@ export default function SourceForm({ source, token, onSave, onClose }) {
         lang_filter: form.lang_filter,
         keywords: form.keywords
           ? JSON.stringify(form.keywords.split(',').map(k => k.trim()).filter(Boolean))
+          : null,
+        exclude_keywords: form.exclude_keywords
+          ? JSON.stringify(form.exclude_keywords.split(',').map(k => k.trim()).filter(Boolean))
           : null,
       }
       const url = isEdit ? `/api/sources/${source.id}` : '/api/sources'
@@ -202,8 +206,13 @@ export default function SourceForm({ source, token, onSave, onClose }) {
           </div>
 
           <div>
-            <span style={LABEL}>Mots-clés (optionnel, séparés par virgules)</span>
+            <span style={LABEL}>Mots-clés à inclure (optionnel, séparés par virgules)</span>
             <input style={INPUT} value={form.keywords} onChange={e => set('keywords', e.target.value)} placeholder="Ex : IA, product, design" />
+          </div>
+
+          <div>
+            <span style={LABEL}>Mots-clés à exclure (optionnel, séparés par virgules)</span>
+            <input style={INPUT} value={form.exclude_keywords} onChange={e => set('exclude_keywords', e.target.value)} placeholder="Ex : bon plan, promo, soldes" />
           </div>
 
           {testResult && (

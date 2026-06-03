@@ -11,7 +11,8 @@ class Source(Base):
     type = Column(String, nullable=False)  # rss / reddit / bluesky / youtube
     url = Column(String, nullable=False)
     tab = Column(String, nullable=False)  # ai_product / ux_product / tech / hardware / video
-    keywords = Column(Text, nullable=True)  # JSON array stringifié
+    keywords = Column(Text, nullable=True)          # JSON array stringifié
+    exclude_keywords = Column(Text, nullable=True)  # JSON array stringifié
     lang_filter = Column(String, default="all")  # fr / en / all
     is_active = Column(Boolean, default=True)
     last_fetched_at = Column(DateTime, nullable=True)

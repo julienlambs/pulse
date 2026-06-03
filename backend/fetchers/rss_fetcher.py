@@ -97,6 +97,13 @@ def fetch_rss(source, db):
             except Exception:
                 pass
 
+        exclude_keywords = []
+        if source.exclude_keywords:
+            try:
+                exclude_keywords = json.loads(source.exclude_keywords)
+            except Exception:
+                pass
+
         count = 0
         for entry in feed.entries:
             external_id = getattr(entry, "id", None) or entry.get("link", "")
@@ -121,10 +128,14 @@ def fetch_rss(source, db):
             )
             summary = _strip_html(raw_summary)[:600]
 
-            # Filtrage par mots-clés
+            text_lower = (title + " " + summary).lower()
+
             if keywords:
-                text_lower = (title + " " + summary).lower()
                 if not any(kw.lower() in text_lower for kw in keywords):
+                    continue
+
+            if exclude_keywords:
+                if any(kw.lower() in text_lower for kw in exclude_keywords):
                     continue
 
             lang = _detect_lang(title + " " + summary)
