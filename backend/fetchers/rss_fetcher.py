@@ -66,6 +66,11 @@ def _fetch_feed(url):
             follow_redirects=True,
             headers={"User-Agent": "Pulse/1.0 RSS Aggregator"},
         )
+        if resp.status_code != 200:
+            result = feedparser.parse("")
+            result["bozo"] = True
+            result["bozo_exception"] = Exception(f"HTTP {resp.status_code}")
+            return result
         return feedparser.parse(resp.content)
     except Exception:
         return feedparser.parse(url)
