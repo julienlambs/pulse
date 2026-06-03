@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600;1,700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+/* ── Thème dark par défaut (Leeroy) ──────────────────────────────────────── */
+:root {
+  --bg:          #0D0D14;
+  --card:        #13131F;
+  --card-2:      #171725;
+  --accent:      #6050DC;
+  --accent-soft: rgba(96,80,220,0.14);
+  --accent-rgb:  96,80,220;
+  --text:        #FFFFFF;
+  --muted:       #8888AA;
+  --border:      #1E1E30;
+  --border-hi:   #2A2A42;
+  --hi:          #FF7A6B;
+  --md:          #E0B96B;
+  --lo:          #6BCB9C;
+  --header-bg:   rgba(13,13,20,0.92);
+}
+
+/* ── Tokens Tailwind v4 (mirror des custom properties) ───────────────────── */
+@theme {
+  --color-bg:        #0D0D14;
+  --color-card:      #13131F;
+  --color-card-2:    #171725;
+  --color-accent:    #6050DC;
+  --color-text:      #FFFFFF;
+  --color-muted:     #8888AA;
+  --color-border:    #1E1E30;
+  --color-border-hi: #2A2A42;
+  --color-hi:        #FF7A6B;
+  --color-md:        #E0B96B;
+  --color-lo:        #6BCB9C;
+
+  --font-title: 'Fraunces', serif;
+  --font-mono:  'JetBrains Mono', monospace;
+}
+
+/* ── Reset ───────────────────────────────────────────────────────────────── */
+* { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, .font-title {
+  font-family: 'Fraunces', serif;
+}
+
+/* ── Animations ──────────────────────────────────────────────────────────── */
+
+/* Barre waveform (audio) */
+@keyframes leeroy-wave {
+  from { height: 4px; }
+  to   { height: 32px; }
+}
+
+/* Bottom sheet mobile */
+@keyframes leeroy-slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* Scrim / overlay */
+@keyframes leeroy-fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Modal desktop */
+@keyframes leeroy-fadeScale {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1);    }
+}

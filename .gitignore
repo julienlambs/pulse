@@ -1,0 +1,34 @@
+# Secrets & config locale
+.env
+.env.local
+.env.*.local
+
+# Données
+*.db
+data/
+
+# Logs
+*.log
+
+# Claude Code — config et docs de travail personnels
+.claude/
+CLAUDE.md
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+.DS_Store
+
+# Docker
+*.override.yml
+
+# Design system reference (local only)
+leeroy-design-system/
