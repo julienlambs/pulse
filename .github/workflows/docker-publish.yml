@@ -3,6 +3,7 @@ name: Build & Deploy
 on:
   push:
     branches: [master]
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
@@ -40,19 +41,3 @@ jobs:
           push: true
           tags: ${{ env.IMAGE_FRONTEND }}:latest
 
-  deploy:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Deploy on NAS
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.NAS_HOST }}
-          username: ${{ secrets.NAS_USER }}
-          key: ${{ secrets.NAS_SSH_KEY }}
-          port: 3009
-          script: |
-            cd /volume1/docker/pulse
-            sudo /usr/local/bin/docker compose pull
-            sudo /usr/local/bin/docker compose up -d

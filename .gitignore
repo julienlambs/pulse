@@ -32,3 +32,6 @@ dist/
 
 # Design system reference (local only)
 leeroy-design-system/
+
+# Deploy scripts (local only)
+*.bat
