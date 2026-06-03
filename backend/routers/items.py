@@ -35,6 +35,8 @@ def _item_to_dict(item: Item):
 def get_items(
     tab: str = Query(...),
     lang: Optional[str] = Query(None),
+    source_type: Optional[list[str]] = Query(None),
+    unread_only: bool = Query(False),
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
@@ -42,6 +44,10 @@ def get_items(
     query = db.query(Item).filter(Item.tab == tab)
     if lang and lang != "all":
         query = query.filter(Item.lang == lang)
+    if source_type:
+        query = query.filter(Item.type.in_(source_type))
+    if unread_only:
+        query = query.filter(Item.is_read == False)
     query = query.order_by(Item.published_at.desc())
     total = query.count()
     items = query.offset(offset).limit(limit).all()

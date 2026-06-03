@@ -49,10 +49,15 @@ def _fetch_full_content(url):
             url,
             timeout=8,
             follow_redirects=True,
-            headers={"User-Agent": "Pulse/1.0 RSS Aggregator"},
+            headers={"User-Agent": "Mozilla/5.0 (compatible; Pulse/1.0)"},
         )
+        if resp.status_code != 200:
+            return None
         doc = Document(resp.text)
-        return doc.summary()
+        content = doc.summary()
+        if not content or len(_strip_html(content)) < 200:
+            return None
+        return content
     except Exception as e:
         logger.debug(f"Content fetch failed for {url}: {e}")
         return None
@@ -128,9 +133,7 @@ def fetch_rss(source, db):
                 continue
 
             url = entry.get("link", "")
-            content = None
-            if url and len(summary) < 300:
-                content = _fetch_full_content(url)
+            content = _fetch_full_content(url) if url else None
 
             published_at = None
             if hasattr(entry, "published_parsed") and entry.published_parsed:

@@ -33,12 +33,16 @@ function SkeletonCard() {
 }
 
 export default function FeedTab({ tab, sourcesMap, savedOverrides = {}, onItemClick }) {
-  const [lang, setLang] = useState(
-    () => localStorage.getItem(`pulse_lang_${tab}`) || 'all'
-  )
+  const [lang, setLang]                 = useState(() => localStorage.getItem(`pulse_lang_${tab}`) || 'all')
+  const [selectedTypes, setSelectedTypes] = useState(() => {
+    try { return new Set(JSON.parse(localStorage.getItem(`pulse_types_${tab}`) || '[]')) }
+    catch { return new Set() }
+  })
+  const [unreadOnly, setUnreadOnly]     = useState(() => localStorage.getItem(`pulse_unread_${tab}`) === 'true')
   const [items, setItems]   = useState([])
   const [total, setTotal]   = useState(0)
   const [offset, setOffset] = useState(0)
+  const [fetchKey, setFetchKey] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError]   = useState(null)
   const sentinelRef = useRef(null)
@@ -50,7 +54,7 @@ export default function FeedTab({ tab, sourcesMap, savedOverrides = {}, onItemCl
   useEffect(() => { itemsLenRef.current = items.length }, [items.length])
   useEffect(() => { totalRef.current = total }, [total])
 
-  // Fetch effect — se déclenche sur (lang, offset)
+  // Fetch effect — se déclenche sur (lang, selectedTypes, unreadOnly, offset, fetchKey)
   useEffect(() => {
     let cancelled = false
     busyRef.current = true
@@ -59,6 +63,8 @@ export default function FeedTab({ tab, sourcesMap, savedOverrides = {}, onItemCl
 
     const qs = new URLSearchParams({ tab, limit: LIMIT, offset })
     if (lang !== 'all') qs.set('lang', lang)
+    selectedTypes.forEach(t => qs.append('source_type', t))
+    if (unreadOnly) qs.set('unread_only', 'true')
 
     apiFetch(`/api/items?${qs}`)
       .then(r => { if (!r.ok) throw new Error(); return r.json() })
@@ -76,7 +82,7 @@ export default function FeedTab({ tab, sourcesMap, savedOverrides = {}, onItemCl
       })
 
     return () => { cancelled = true; busyRef.current = false }
-  }, [lang, offset]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [lang, selectedTypes, unreadOnly, offset, fetchKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Infinite scroll — observer stable (deps vides), utilise des refs
   useEffect(() => {
@@ -91,12 +97,29 @@ export default function FeedTab({ tab, sourcesMap, savedOverrides = {}, onItemCl
     return () => obs.disconnect()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  function handleLangChange(newLang) {
-    localStorage.setItem(`pulse_lang_${tab}`, newLang)
-    setLang(newLang)
+  function resetFeed() {
     setItems([])
     setTotal(0)
     setOffset(0)
+    setFetchKey(k => k + 1)
+  }
+
+  function handleLangChange(newLang) {
+    localStorage.setItem(`pulse_lang_${tab}`, newLang)
+    setLang(newLang)
+    resetFeed()
+  }
+
+  function handleTypesChange(newTypes) {
+    localStorage.setItem(`pulse_types_${tab}`, JSON.stringify([...newTypes]))
+    setSelectedTypes(newTypes)
+    resetFeed()
+  }
+
+  function handleUnreadOnlyChange(val) {
+    localStorage.setItem(`pulse_unread_${tab}`, val)
+    setUnreadOnly(val)
+    resetFeed()
   }
 
   async function handleSave(item) {
@@ -114,7 +137,14 @@ export default function FeedTab({ tab, sourcesMap, savedOverrides = {}, onItemCl
 
   return (
     <div>
-      <LangFilter value={lang} onChange={handleLangChange} />
+      <LangFilter
+        lang={lang}
+        onLangChange={handleLangChange}
+        selectedTypes={selectedTypes}
+        onTypesChange={handleTypesChange}
+        unreadOnly={unreadOnly}
+        onUnreadOnlyChange={handleUnreadOnlyChange}
+      />
 
       <div style={{ padding: '4px 12px 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
         {items.map(raw => {
