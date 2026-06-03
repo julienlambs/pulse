@@ -1,5 +1,5 @@
 const TABS = [
-  { id: 'ai_product', label: 'IA',      icon: '⚡' },
+  { id: 'ai_product', label: 'IA',      icon: '✦' },
   { id: 'ux_product', label: 'UX',      icon: '◈' },
   { id: 'tech',       label: 'Tech',    icon: '◷' },
   { id: 'hardware',   label: 'HW',      icon: '◎' },
