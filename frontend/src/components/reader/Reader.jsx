@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { apiFetch } from '../../lib/api'
 import FontSizePicker from './FontSizePicker'
 
@@ -33,6 +33,13 @@ export default function Reader({ item, sourceName, onBack, onSaveUpdate }) {
   const [showFontPicker, setShowFontPicker] = useState(false)
 
   const badge = TYPE_BADGE[item.type] || TYPE_BADGE.rss
+
+  useEffect(() => {
+    window.history.pushState({ reader: true }, '')
+    function handlePopState() { onBack() }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
 
   async function handleSave() {
     const newSaved = !saved
@@ -75,7 +82,7 @@ export default function Reader({ item, sourceName, onBack, onSaveUpdate }) {
         zIndex: 51,
         flexShrink: 0,
       }}>
-        <button onClick={onBack} style={{ ...BTN, fontSize: 22 }}>←</button>
+        <button onClick={() => window.history.back()} style={{ ...BTN, fontSize: 22 }}>←</button>
         <div style={{ flex: 1 }} />
         <button
           onClick={() => setShowFontPicker(true)}
