@@ -70,7 +70,7 @@ export default function VideoCard({ item, onSave }) {
         </div>
 
         <p style={{
-          fontFamily: 'Fraunces, serif',
+          fontFamily: 'JetBrains Mono, monospace',
           fontWeight: 600,
           fontSize: 15,
           lineHeight: 1.3,

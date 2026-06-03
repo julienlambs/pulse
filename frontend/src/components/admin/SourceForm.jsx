@@ -168,7 +168,7 @@ export default function SourceForm({ source, token, onSave, onClose }) {
           <div style={{ width: 36, height: 4, borderRadius: 2, background: 'var(--border-hi)' }} />
         </div>
 
-        <p style={{ fontFamily: 'Fraunces, serif', fontSize: 18, fontWeight: 600, color: 'var(--text)', margin: '0 0 20px' }}>
+        <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 18, fontWeight: 600, color: 'var(--text)', margin: '0 0 20px' }}>
           {isEdit ? 'Modifier la source' : 'Ajouter une source'}
         </p>
 

@@ -105,7 +105,7 @@ export default function SavedPage({ sourcesMap, onBack, onItemClick }) {
         >
           ←
         </button>
-        <span style={{ fontFamily: 'Fraunces, serif', fontWeight: 600, fontSize: 18, color: 'var(--text)' }}>
+        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 600, fontSize: 18, color: 'var(--text)' }}>
           Sauvegardés
         </span>
         {total > 0 && (

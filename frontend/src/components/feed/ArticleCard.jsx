@@ -88,7 +88,7 @@ export default function ArticleCard({ item, sourceName, onRead, onSave }) {
 
       {/* Titre */}
       <p style={{
-        fontFamily: 'Fraunces, serif',
+        fontFamily: 'JetBrains Mono, monospace',
         fontWeight: 600,
         fontSize: 15.5,
         lineHeight: 1.3,

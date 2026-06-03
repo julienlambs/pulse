@@ -91,7 +91,7 @@ export default function AdminPage({ token, onBack, onLogout }) {
         >
           ←
         </button>
-        <span style={{ fontFamily: 'Fraunces, serif', fontWeight: 600, fontSize: 18, color: 'var(--text)', flex: 1 }}>
+        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 600, fontSize: 18, color: 'var(--text)', flex: 1 }}>
           Admin
         </span>
         <span style={{

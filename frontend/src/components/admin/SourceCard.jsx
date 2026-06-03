@@ -40,7 +40,7 @@ export default function SourceCard({ source, onToggle, onEdit, onDelete, onFetch
       {/* Ligne 1 : nom + badges + toggle */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <span style={{
-          fontFamily: 'Fraunces, serif',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 14,
           fontWeight: 600,
           color: 'var(--text)',

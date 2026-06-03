@@ -49,7 +49,7 @@ export default function Login({ onLogin }) {
       padding: '0 32px',
     }}>
       <span style={{
-        fontFamily: 'Fraunces, serif',
+        fontFamily: 'JetBrains Mono, monospace',
         fontWeight: 600,
         fontSize: 36,
         color: 'var(--accent)',

@@ -123,7 +123,7 @@ export default function Reader({ item, sourceName, onBack, onSaveUpdate }) {
 
         {/* Titre */}
         <h1 style={{
-          fontFamily: 'Fraunces, serif',
+          fontFamily: 'JetBrains Mono, monospace',
           fontWeight: 600,
           fontSize: 27,
           lineHeight: 1.18,

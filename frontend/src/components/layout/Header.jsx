@@ -32,7 +32,7 @@ export default function Header({ onSavedClick, onAdminClick }) {
       gap: 4,
     }}>
       <span style={{
-        fontFamily: 'Fraunces, serif',
+        fontFamily: 'JetBrains Mono, monospace',
         fontWeight: 600,
         fontSize: 22,
         color: 'var(--accent)',

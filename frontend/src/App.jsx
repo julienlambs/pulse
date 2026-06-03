@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTheme } from './lib/themes'
 import { apiFetch } from './lib/api'
+import HexBackground from './components/HexBackground'
 import Header from './components/layout/Header'
 import BottomNav from './components/layout/BottomNav'
 import FeedTab from './components/feed/FeedTab'
@@ -84,6 +85,7 @@ export default function App() {
 
   return (
     <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', background: 'var(--bg)', overflow: 'hidden' }}>
+      <HexBackground />
       {showHeader && (
         <Header
           onSavedClick={() => setPage('saved')}

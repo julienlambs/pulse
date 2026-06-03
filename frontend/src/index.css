@@ -1,39 +1,37 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600;1,700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
-/* ── Thème dark par défaut (Leeroy) ──────────────────────────────────────── */
 :root {
-  --bg:          #0D0D14;
-  --card:        #13131F;
-  --card-2:      #171725;
+  --bg:          #0D0D0D;
+  --card:        #141414;
+  --card-2:      #1C1C1C;
   --accent:      #6050DC;
   --accent-soft: rgba(96,80,220,0.14);
   --accent-rgb:  96,80,220;
-  --text:        #FFFFFF;
-  --muted:       #8888AA;
-  --border:      #1E1E30;
-  --border-hi:   #2A2A42;
+  --text:        #E8E8E2;
+  --muted:       #8A8A82;
+  --border:      rgba(255,255,255,0.07);
+  --border-hi:   rgba(255,255,255,0.12);
   --hi:          #FF7A6B;
   --md:          #E0B96B;
   --lo:          #6BCB9C;
-  --header-bg:   rgba(13,13,20,0.92);
+  --header-bg:   rgba(13,13,13,0.92);
 }
 
-/* ── Tokens Tailwind v4 (mirror des custom properties) ───────────────────── */
 @theme {
-  --color-bg:        #0D0D14;
-  --color-card:      #13131F;
-  --color-card-2:    #171725;
+  --color-bg:        #0D0D0D;
+  --color-card:      #141414;
+  --color-card-2:    #1C1C1C;
   --color-accent:    #6050DC;
-  --color-text:      #FFFFFF;
-  --color-muted:     #8888AA;
-  --color-border:    #1E1E30;
-  --color-border-hi: #2A2A42;
+  --color-text:      #E8E8E2;
+  --color-muted:     #8A8A82;
+  --color-border:    rgba(255,255,255,0.07);
+  --color-border-hi: rgba(255,255,255,0.12);
   --color-hi:        #FF7A6B;
   --color-md:        #E0B96B;
   --color-lo:        #6BCB9C;
 
-  --font-title: 'Fraunces', serif;
+  --font-title: 'JetBrains Mono', monospace;
   --font-mono:  'JetBrains Mono', monospace;
 }
 
@@ -55,7 +53,7 @@ body {
 }
 
 h1, h2, h3, .font-title {
-  font-family: 'Fraunces', serif;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 /* ── Animations ──────────────────────────────────────────────────────────── */
