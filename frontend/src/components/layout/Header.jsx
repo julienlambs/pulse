@@ -1,4 +1,4 @@
-import { useTheme } from '../../lib/themes'
+import { useTheme } from '@declic/ui'
 
 const BTN = {
   background: 'none',
@@ -15,7 +15,7 @@ const BTN = {
 }
 
 export default function Header({ onSavedClick, onAdminClick }) {
-  const { mode, toggle } = useTheme()
+  const { mode, toggleMode } = useTheme()
 
   return (
     <header style={{
@@ -43,7 +43,7 @@ export default function Header({ onSavedClick, onAdminClick }) {
       </span>
 
       <button onClick={onSavedClick} style={BTN} aria-label="Sauvegardés">🔖</button>
-      <button onClick={toggle} style={BTN} aria-label="Thème">
+      <button onClick={toggleMode} style={BTN} aria-label="Thème">
         {mode === 'dark' ? '☀' : '☾'}
       </button>
       <button onClick={onAdminClick} style={BTN} aria-label="Admin">⚙</button>

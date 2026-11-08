@@ -88,3 +88,9 @@
   text-align: center;
   margin-top: 6px;
 }
+
+/* Squelette de chargement (provisoire, remplacé par le squelette Déclic au lot 2) */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}

@@ -1,0 +1,30 @@
+/* iA Writer Quattro : police du texte long (classe .prose), licence SIL OFL 1.1 (fonts/ia/LICENSE.md, à copier avec les polices).
+   Quatre fichiers seulement : 400 et 700, droit et italique. Pas d'axe de largeur ni d'autres graisses. */
+@font-face {
+  font-family: 'iA Writer Quattro';
+  src: url('ia/iAWriterQuattroS-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'iA Writer Quattro';
+  src: url('ia/iAWriterQuattroS-Italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'iA Writer Quattro';
+  src: url('ia/iAWriterQuattroS-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'iA Writer Quattro';
+  src: url('ia/iAWriterQuattroS-BoldItalic.woff2') format('woff2');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}

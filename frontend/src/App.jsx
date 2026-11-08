@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { useTheme } from './lib/themes'
+import { useTheme, useViseurFocus, SphinxBackground } from '@declic/ui'
 import { apiFetch } from './lib/api'
-import HexBackground from './components/HexBackground'
 import Header from './components/layout/Header'
 import BottomNav from './components/layout/BottomNav'
 import FeedTab from './components/feed/FeedTab'
@@ -12,6 +11,7 @@ import AdminPage from './components/admin/AdminPage'
 
 export default function App() {
   useTheme()
+  useViseurFocus()
 
   const [activeTab, setActiveTab]           = useState('ai_product')
   const [sourcesMap, setSourcesMap]         = useState({})
@@ -74,7 +74,8 @@ export default function App() {
 
   if (!authToken) {
     return (
-      <div style={{ height: '100dvh', background: 'var(--bg)' }}>
+      <div style={{ height: '100dvh' }}>
+        <SphinxBackground />
         <Login onLogin={handleLogin} />
       </div>
     )
@@ -84,8 +85,8 @@ export default function App() {
   const showNavBar  = page === 'feed'
 
   return (
-    <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', background: 'var(--bg)', overflow: 'hidden' }}>
-      <HexBackground />
+    <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <SphinxBackground />
       {showHeader && (
         <Header
           onSavedClick={() => setPage('saved')}

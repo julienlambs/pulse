@@ -30,8 +30,8 @@ dist/
 # Docker
 *.override.yml
 
-# Design system reference (local only)
-leeroy-design-system/
+# Archives locales (ancien design system Leeroy)
+_archive/
 
 # Deploy scripts (local only)
 *.bat
