@@ -1,96 +1,99 @@
-@keyframes skeleton-pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.4; }
-}
+/* CSS propre à Pulse, par-dessus la charte Le Déclic (index.css, copie à ne pas retoucher).
+   Hors couche : il l'emporte sur les briques (@layer components) sans chercher de spécificité.
+   Uniquement des jetons de la charte : --s-N, --t-*, --z-*, couleurs. */
 
-/* ── Contenu lecteur (HTML extrait par readability) ──────────────────────── */
-.reader-content img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px;
-  margin: 12px 0;
-  display: block;
-}
+/* ── Coquille : menu latéral (≥ 600 px) + colonne (barre du haut, contenu qui défile, barre du bas) ── */
+.coquille { display: flex; height: 100dvh; }
+.coquille-col { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.coquille-main { flex: 1; min-height: 0; overflow-y: auto; }
 
-.reader-content a {
-  color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
+/* ── Connexion ─────────────────────────────────────────────────────────── */
+.connexion { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100dvh;
+  padding: 0 var(--s-8); box-sizing: border-box; text-align: center; }
+.connexion .h-page { margin: 0 0 var(--s-2); }
+.connexion-sous { margin: 0 0 var(--s-10); color: var(--muted); }
+.connexion-form { width: 100%; max-width: 340px; text-align: left; }
 
-.reader-content p {
-  margin: 0 0 1.1em;
-}
+/* ── Fil : liste de cartes ─────────────────────────────────────────────── */
+.feed { display: flex; flex-direction: column; gap: var(--s-3); max-width: 720px; margin: 0 auto; padding: var(--s-1) var(--s-3) var(--s-6); }
+.feed-sentinelle { height: var(--s-1); }
+.feed-suite { margin: 0; padding: var(--s-2) 0; text-align: center; font-size: var(--t-sm); color: var(--muted); }
 
-.reader-content h1,
-.reader-content h2,
-.reader-content h3,
-.reader-content h4 {
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 600;
-  color: var(--text);
-  margin: 1.4em 0 0.5em;
-  line-height: 1.25;
-}
+/* ── Filtres du fil ────────────────────────────────────────────────────── */
+.filtres { max-width: 720px; margin: 0 auto; padding: var(--s-3) var(--s-3) var(--s-2); }
+.filtres-ligne { display: flex; align-items: center; gap: var(--s-2); }
+/* « Langue » et « Taille du texte » se lisent déjà dans le contenu ou le titre du panneau : étiquette pour lecteur d'écran seulement */
+:is(.filtres-ligne, .taille-choix) .lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.filtres-btn { margin-left: auto; }
+.filtres-panneau { margin-top: var(--s-3); }
+.filtres-espace { height: var(--s-4); }
 
-.reader-content h1 { font-size: 1.5em; }
-.reader-content h2 { font-size: 1.25em; }
-.reader-content h3 { font-size: 1.1em; }
+/* ── Carte article / vidéo : le titre est un lien étiré sur toute la carte ── */
+.carte-w { --c: var(--c-card); cursor: auto; }
+.carte-w.lue { opacity: .5; }
+.carte-w:not(.lue) { opacity: .8; }
+.carte-w:hover:not(.lue) { opacity: 1; }
+.carte-w { transition: opacity var(--dh) var(--ease); }
+.carte-w .in { position: relative; }
+.carte-tete { display: flex; align-items: center; gap: var(--s-2); margin-bottom: var(--s-2); min-height: var(--bh); }
+.carte-source { max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.carte-chaine { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--t-xs); color: var(--muted); }
+.carte-act { margin-left: auto; position: relative; z-index: var(--z-dessus); } /* au-dessus du lien étiré */
+.ic-muet { color: var(--muted); display: inline-flex; }
+.carte-titre { margin: 0 0 var(--s-2); font-family: var(--font-title); font-weight: 600; font-size: var(--t-lg); line-height: 1.3; }
+.carte-lien { color: var(--text); text-decoration: none; outline: none; }
+.carte-lien::after { content: ''; position: absolute; inset: 0; } /* toute la carte ouvre l'article */
+.carte-resume { margin: 0 0 var(--s-2); font-size: var(--t-sm); line-height: 1.5; color: var(--muted);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.carte-meta { margin: 0; font-size: var(--t-xs); color: var(--muted); }
+.carte-vignette { --c: var(--c-tile); position: relative; aspect-ratio: 16 / 9; margin-bottom: var(--s-3); background: var(--card2); }
+.carte-vignette > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 
-.reader-content ul,
-.reader-content ol {
-  padding-left: 1.5em;
-  margin: 0 0 1em;
-}
+/* ── Panneau du bas (taille du texte, formulaire de source) ───────────── */
+.surface-bas { position: fixed; left: 0; right: 0; bottom: 0; padding: 0 var(--s-2); z-index: var(--z-surface); pointer-events: none; }
+.surface-bas-in { max-width: 560px; margin: 0 auto; pointer-events: auto; }
+.surface-bas .h-card { margin: 0 0 var(--s-4); }
+.sheet-defile { max-height: 88dvh; overflow-y: auto; box-sizing: border-box; }
+.taille-choix { padding-bottom: var(--s-2); }
 
-.reader-content li {
-  margin-bottom: 0.4em;
-}
+/* ── Lecteur ───────────────────────────────────────────────────────────── */
+.lecteur { position: fixed; inset: 0; z-index: var(--z-surface); overflow-y: auto; }
+.lecteur-article { max-width: 720px; margin: 0 auto; padding: var(--s-6) var(--s-5) var(--s-12); }
+.lecteur-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin-bottom: var(--s-4); font-size: var(--t-xs); color: var(--muted); }
+.lecteur-titre { margin: 0 0 var(--s-6); }
+.lecteur-vide { padding-top: var(--s-4); }
+.lecteur-vide p { margin: 0 0 var(--s-5); color: var(--muted); }
 
-.reader-content blockquote {
-  margin: 1em 0;
-  padding: 12px 16px;
-  border-left: 3px solid var(--accent);
-  background: var(--card);
-  border-radius: 0 8px 8px 0;
-  color: var(--muted);
-}
+/* HTML extrait par readability : la charte (.prose) fait la typographie, ici seulement ce qu'elle ne couvre pas */
+.reader-content img { max-width: 100%; height: auto; display: block; margin: var(--s-3) 0; }
+.reader-content h1 { font-family: var(--font-title); font-weight: 600; font-size: var(--t-xl); line-height: 1.2; margin: 1.9em 0 .55em; }
+.reader-content h4 { font-family: var(--font-title); font-weight: 600; font-size: var(--t-base); margin: 1.6em 0 .5em; }
+.reader-content hr { border: none; border-top: 1px solid var(--stroke); margin: 2em 0; }
+.reader-content figure { margin: var(--s-3) 0; }
+.reader-content figcaption { font-size: var(--t-xs); color: var(--muted); text-align: center; margin-top: var(--s-2); }
+.reader-content table { display: block; overflow-x: auto; }
 
-.reader-content pre,
-.reader-content code {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.88em;
-  background: var(--card-2);
-  border-radius: 6px;
-}
+/* ── Sauvegardés ───────────────────────────────────────────────────────── */
+.sauv-filtres { max-width: 720px; margin: 0 auto; padding: var(--s-3) var(--s-3) 0; display: grid; gap: 0 var(--s-3); }
+@media (min-width: 600px) { .sauv-filtres { grid-template-columns: 1fr 1fr; } }
+.sauv-dates { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3); grid-column: 1 / -1; }
 
-.reader-content pre {
-  padding: 14px 16px;
-  overflow-x: auto;
-  margin: 0 0 1em;
-}
-
-.reader-content code {
-  padding: 2px 5px;
-}
-
-.reader-content hr {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 2em 0;
-}
-
-/* Masquer les éléments de navigation/pub injectés par readability */
-.reader-content figure { margin: 12px 0; }
-.reader-content figcaption {
-  font-size: 0.85em;
-  color: var(--muted);
-  text-align: center;
-  margin-top: 6px;
-}
-
-/* Squelette de chargement (provisoire, remplacé par le squelette Déclic au lot 2) */
-@keyframes skeleton-pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.4; }
-}
+/* ── Admin ─────────────────────────────────────────────────────────────── */
+.admin { max-width: 720px; margin: 0 auto; padding: var(--s-2) var(--s-3) calc(var(--s-12) + var(--s-12)); }
+.admin-groupe { margin-bottom: var(--s-6); }
+.admin-groupe .h-sub { margin: var(--s-2) 0 var(--s-3) var(--s-1); color: var(--muted); }
+.admin-liste { display: flex; flex-direction: column; gap: var(--s-2); }
+.source.inactive { opacity: .6; }
+.source-tete { display: flex; align-items: center; gap: var(--s-2); }
+.source-tete .opt { margin: 0; }
+.source-nom { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.source-onglet { flex: none; font-size: var(--t-xs); color: var(--muted); }
+.source-stats { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin: var(--s-2) 0 0; font-size: var(--t-xs); color: var(--muted); }
+.source-stats.erreur { color: var(--hi); }
+.source-stats .badge { display: inline-flex; align-items: center; gap: var(--s-1); white-space: nowrap; }
+.source-actions { display: flex; align-items: center; gap: var(--s-2); margin-top: var(--s-3); }
+.fab { position: fixed; right: var(--s-5); bottom: var(--s-6); z-index: var(--z-collant); --bh: 52px;
+  filter: drop-shadow(0 4px 16px color-mix(in oklab, var(--pri) 50%, transparent)); }
+.source-form-ligne { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3); }
+.source-form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin-top: var(--s-2); }
+.source-form .ban { margin-bottom: var(--s-3); }

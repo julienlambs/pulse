@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { BarreHaut, EmptyState, IconBtn, Icone, RichListSkeleton, Banniere, useSkeleton } from '@declic/ui'
 import { apiFetch } from '../lib/api'
 import ArticleCard from '../components/feed/ArticleCard'
 import VideoCard from '../components/feed/VideoCard'
@@ -23,6 +24,7 @@ export default function SavedPage({ sourcesMap, onBack, onItemClick }) {
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState(null)
   const sentinelRef = useRef(null)
+  const skOn = useSkeleton(loading && items.length === 0)
   const itemsLenRef = useRef(0)
   const totalRef    = useRef(0)
   const busyRef     = useRef(false)
@@ -91,41 +93,19 @@ export default function SavedPage({ sourcesMap, onBack, onItemClick }) {
   }
 
   return (
-    <div style={{ minHeight: '100%' }}>
-      {/* Header secondaire */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        padding: '12px 16px 8px',
-        gap: 12,
-      }}>
-        <button
-          onClick={onBack}
-          style={{ background: 'none', border: 'none', color: 'var(--muted)', fontSize: 22, cursor: 'pointer', padding: '4px', lineHeight: 1 }}
-        >
-          ←
-        </button>
-        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 600, fontSize: 18, color: 'var(--text)' }}>
-          Sauvegardés
-        </span>
-        {total > 0 && (
-          <span style={{
-            fontFamily: 'JetBrains Mono, monospace',
-            fontSize: 11,
-            padding: '2px 8px',
-            borderRadius: 6,
-            background: 'var(--accent-soft)',
-            color: 'var(--accent)',
-          }}>
-            {total}
-          </span>
-        )}
+    <>
+      <BarreHaut
+        menu={<IconBtn className="bw vfw ibtn" kind="ghost" label="Retour au fil" icon={<Icone nom="retour" />} onClick={onBack} />}
+        titre="Sauvegardés"
+        actions={total > 0 && <span className="badge cut bg-acc" aria-label={`${total} articles`}>{total}</span>}
+      />
+
+      <div className="sauv-filtres">
+        <TabFilter value={tab} onChange={handleTabChange} />
+        <DateFilter onChange={handleDateChange} />
       </div>
 
-      <TabFilter value={tab} onChange={handleTabChange} />
-      <DateFilter onChange={handleDateChange} />
-
-      <div style={{ padding: '4px 12px 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div className="feed" aria-busy={loading || undefined}>
         {items.map(item =>
           item.type === 'youtube'
             ? <VideoCard key={item.id} item={item} onSave={handleSave} />
@@ -139,31 +119,24 @@ export default function SavedPage({ sourcesMap, onBack, onItemClick }) {
         )}
 
         {loading && items.length === 0 && (
-          <p style={{ color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: 13, textAlign: 'center', paddingTop: 48 }}>
-            Chargement…
-          </p>
+          <RichListSkeleton rows={4} visible={skOn} message="Chargement des sauvegardés…" />
         )}
 
         {!loading && !error && items.length === 0 && (
-          <p style={{ color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: 13, textAlign: 'center', paddingTop: 48 }}>
-            Aucun article sauvegardé pour le moment
-          </p>
+          <EmptyState icone="signet" status titre="Aucun article sauvegardé sur cette période">
+            Le marque-page d’une carte la garde ici, à l’abri de la purge des 30 jours.
+          </EmptyState>
         )}
 
         {error && (
-          <p style={{ color: 'var(--hi)', fontFamily: 'JetBrains Mono, monospace', fontSize: 13, textAlign: 'center', paddingTop: 32 }}>
-            {error}
-          </p>
+          <Banniere ton="hi" titre="Erreur réseau.">Les sauvegardés n’ont pas pu être chargés.</Banniere>
         )}
 
-        <div ref={sentinelRef} style={{ height: 4 }} />
+        <div ref={sentinelRef} className="feed-sentinelle" />
         {loading && items.length > 0 && (
-          <p style={{ color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: 12, textAlign: 'center', padding: '8px 0' }}>
-            Chargement…
-          </p>
+          <p className="feed-suite" role="status">Chargement…</p>
         )}
-        <div style={{ height: 20 }} />
       </div>
-    </div>
+    </>
   )
 }

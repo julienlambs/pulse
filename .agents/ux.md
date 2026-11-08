@@ -109,16 +109,17 @@ Chips horizontales sous le header : `TOUS` / `FR` / `EN`
 
 - Nom de source en badge + date de publication : Saira 13px, `var(--muted)`
 - Titre : Déclic, titre de page (`.h-page`), `var(--text)`
-- Corps : font système (`-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`), line-height 1.7, `var(--text)`
+- Corps : texte long de la charte (`.prose`, iA Writer Quattro, interligne 1,7, colonne de 68 caractères), `var(--text)`
 - Suit le thème global de l'app (dark ou light selon préférence utilisateur)
 
 ### Popover taille de texte (Aa)
 
 Bottom sheet avec drag handle.
-Trois chips : `S` (14px) / `M` (16px) / `L` (19px)
+Boutons groupés : `S` (16px) / `M` (18px, taille de `.prose`) / `L` (21px)
+- Une ancienne préférence (14 / 16 / 19) repart sur `M`
 - `M` actif par défaut
 - Préférence persistée en localStorage
-- Se ferme au tap en dehors
+- Se ferme au tap en dehors ou avec Échap ; le choix s'applique tout de suite, le panneau reste ouvert
 
 ### Fallback
 

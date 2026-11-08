@@ -1,130 +1,37 @@
+import { Viseur } from '@declic/ui'
 import { timeAgo } from '../../lib/utils'
+import { badgeClass, TYPE_LABEL } from './sourceBadge'
+import SaveButton from './SaveButton'
 
-const TYPE_BADGE = {
-  rss:     { bg: 'var(--accent-soft)',         color: 'var(--accent)' },
-  reddit:  { bg: 'rgba(255,122,107,0.12)',      color: 'var(--hi)' },
-  bluesky: { bg: 'rgba(107,203,156,0.12)',      color: 'var(--lo)' },
-  youtube: { bg: 'rgba(255,122,107,0.15)',      color: 'var(--hi)' },
-}
-
+// Toute la carte ouvre l'article : le titre est un vrai lien, étiré sur la carte (.carte-lien),
+// le marque-page passe au-dessus. Sauvegardée : rappel de coupe (.acc).
 export default function ArticleCard({ item, sourceName, onRead, onSave }) {
-  const badge = TYPE_BADGE[item.type] || TYPE_BADGE.rss
-
-  function handleClick() {
+  function handleOpen(e) {
+    if (e.ctrlKey || e.metaKey || e.shiftKey || e.button === 1) return // nouvel onglet : laisser faire le navigateur
+    e.preventDefault()
     onRead(item)
   }
 
-  function handleSave(e) {
-    e.stopPropagation()
-    onSave(item)
-  }
-
   return (
-    <div
-      onClick={handleClick}
-      style={{
-        background: 'var(--card)',
-        border: item.is_saved ? '1px solid rgba(96,80,220,0.35)' : '1px solid var(--border)',
-        borderRadius: 12,
-        padding: '14px 14px 12px',
-        cursor: 'pointer',
-        opacity: item.is_read ? 0.5 : 0.8,
-        transition: 'opacity 0.15s',
-        WebkitTapHighlightColor: 'transparent',
-      }}
-    >
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-        <span style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 10.5,
-          fontWeight: 700,
-          padding: '2px 7px',
-          borderRadius: 6,
-          background: badge.bg,
-          color: badge.color,
-          flexShrink: 0,
-          maxWidth: 140,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-        }}>
-          {sourceName || item.type.toUpperCase()}
-        </span>
+    <article className={`carte-w vfw liw${item.is_read ? ' lue' : ''}`}>
+      <div className={`cs cut card${item.is_saved ? ' acc' : ''}`}><div className="in cut2">
+        <div className="carte-tete">
+          <span className={`${badgeClass(item.type)} carte-source`}>{sourceName || TYPE_LABEL[item.type] || item.type}</span>
+          {item.lang === 'en' && <span className="badge cut bg-neu" lang="en">EN</span>}
+          <SaveButton saved={item.is_saved} onClick={() => onSave(item)} />
+        </div>
 
-        {item.lang === 'en' && (
-          <span style={{
-            fontFamily: 'JetBrains Mono, monospace',
-            fontSize: 10,
-            fontWeight: 600,
-            padding: '2px 6px',
-            borderRadius: 6,
-            background: 'var(--card-2)',
-            color: 'var(--muted)',
-            flexShrink: 0,
-          }}>
-            EN
-          </span>
-        )}
+        <h3 className="carte-titre">
+          <a className="carte-lien" href={item.url} onClick={handleOpen}>{item.title}</a>
+        </h3>
 
-        <button
-          onClick={handleSave}
-          style={{
-            marginLeft: 'auto',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            color: item.is_saved ? 'var(--accent)' : 'var(--muted)',
-            padding: '2px 4px',
-            lineHeight: 1,
-            flexShrink: 0,
-            WebkitTapHighlightColor: 'transparent',
-          }}
-        >
-          <svg width="13" height="16" viewBox="0 0 13 16" fill={item.is_saved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg">
-            <path d="M1.5 1.5h10v13l-5-3-5 3V1.5z"/>
-          </svg>
-        </button>
-      </div>
+        {item.summary && <p className="carte-resume">{item.summary}</p>}
 
-      {/* Titre */}
-      <p style={{
-        fontFamily: 'JetBrains Mono, monospace',
-        fontWeight: 600,
-        fontSize: 15.5,
-        lineHeight: 1.3,
-        color: 'var(--text)',
-        margin: '0 0 6px',
-      }}>
-        {item.title}
-      </p>
-
-      {/* Résumé */}
-      {item.summary && (
-        <p style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 13,
-          lineHeight: 1.5,
-          color: 'var(--muted)',
-          margin: '0 0 8px',
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-        }}>
-          {item.summary}
+        <p className="carte-meta">
+          {item.author ? `${item.author} · ` : ''}{timeAgo(item.published_at)}
         </p>
-      )}
-
-      {/* Footer */}
-      <p style={{
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 11,
-        color: 'var(--muted)',
-        margin: 0,
-      }}>
-        {item.author ? `${item.author} · ` : ''}{timeAgo(item.published_at)}
-      </p>
-    </div>
+      </div></div>
+      <Viseur />
+    </article>
   )
 }

@@ -1,36 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
+import { Banniere, Btn, EmptyState, RichListSkeleton, useSkeleton } from '@declic/ui'
 import { apiFetch } from '../../lib/api'
 import ArticleCard from './ArticleCard'
 import VideoCard from './VideoCard'
 import LangFilter from './LangFilter'
 
 const LIMIT = 20
-
-function SkeletonCard() {
-  const bar = (w, h = 14) => ({
-    width: w,
-    height: h,
-    borderRadius: 4,
-    background: 'var(--card-2)',
-    animation: 'skeleton-pulse 1.5s ease-in-out infinite',
-  })
-  return (
-    <div style={{
-      background: 'var(--card)',
-      border: '1px solid var(--border)',
-      borderRadius: 12,
-      padding: 14,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 10,
-    }}>
-      <div style={bar(90, 18)} />
-      <div style={bar('88%', 16)} />
-      <div style={bar('65%', 16)} />
-      <div style={bar(100, 12)} />
-    </div>
-  )
-}
 
 export default function FeedTab({ tab, sourcesMap, savedOverrides = {}, onItemClick }) {
   const [lang, setLang]                 = useState(() => localStorage.getItem(`pulse_lang_${tab}`) || 'all')
@@ -46,6 +21,7 @@ export default function FeedTab({ tab, sourcesMap, savedOverrides = {}, onItemCl
   const [loading, setLoading] = useState(false)
   const [error, setError]   = useState(null)
   const sentinelRef = useRef(null)
+  const skOn = useSkeleton(loading && items.length === 0)
   // Refs pour éviter les closures stale dans l'observer
   const itemsLenRef = useRef(0)
   const totalRef    = useRef(0)
@@ -122,6 +98,18 @@ export default function FeedTab({ tab, sourcesMap, savedOverrides = {}, onItemCl
     resetFeed()
   }
 
+  const filtered = lang !== 'all' || selectedTypes.size > 0 || unreadOnly
+
+  function clearFilters() {
+    localStorage.removeItem(`pulse_lang_${tab}`)
+    localStorage.removeItem(`pulse_types_${tab}`)
+    localStorage.removeItem(`pulse_unread_${tab}`)
+    setLang('all')
+    setSelectedTypes(new Set())
+    setUnreadOnly(false)
+    resetFeed()
+  }
+
   async function handleSave(item) {
     await apiFetch(`/api/items/${item.id}/save`, { method: 'PATCH' })
     setItems(prev => prev.map(i => i.id === item.id ? { ...i, is_saved: !i.is_saved } : i))
@@ -146,7 +134,7 @@ export default function FeedTab({ tab, sourcesMap, savedOverrides = {}, onItemCl
         onUnreadOnlyChange={handleUnreadOnlyChange}
       />
 
-      <div style={{ padding: '4px 12px 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div className="feed" aria-busy={loading || undefined}>
         {items.map(raw => {
           const item = savedOverrides[raw.id] !== undefined
             ? { ...raw, is_saved: savedOverrides[raw.id] }
@@ -162,32 +150,32 @@ export default function FeedTab({ tab, sourcesMap, savedOverrides = {}, onItemCl
               />
         })}
 
-        {loading && items.length === 0 &&
-          Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)
-        }
-
-        {!loading && !error && items.length === 0 && (
-          <p style={{ color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: 13, textAlign: 'center', paddingTop: 64 }}>
-            Aucun article pour le moment
-          </p>
+        {loading && items.length === 0 && (
+          <RichListSkeleton rows={5} visible={skOn} message="Chargement des articles…" />
         )}
+
+        {!loading && !error && items.length === 0 && (filtered ? (
+          <EmptyState icone="recherche" status titre="Aucun article avec ces filtres"
+            action={<Btn kind="sec" onClick={clearFilters}>Effacer les filtres</Btn>}>
+            Les autres articles de l’onglet sont toujours là : enlève les filtres pour les revoir.
+          </EmptyState>
+        ) : (
+          <EmptyState icone="liste" titre="Aucun article pour le moment">
+            Les sources de cet onglet sont relues toutes les heures : les nouveaux articles arriveront ici.
+          </EmptyState>
+        ))}
 
         {error && (
-          <p style={{ color: 'var(--hi)', fontFamily: 'JetBrains Mono, monospace', fontSize: 13, textAlign: 'center', paddingTop: 32 }}>
-            {error}
-          </p>
+          <Banniere ton="hi" titre="Erreur réseau." actions={[{ label: 'Réessayer', onClick: resetFeed }]}>
+            Les articles n’ont pas pu être chargés.
+          </Banniere>
         )}
 
-        <div ref={sentinelRef} style={{ height: 4 }} />
+        <div ref={sentinelRef} className="feed-sentinelle" />
 
         {loading && items.length > 0 && (
-          <p style={{ color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace', fontSize: 12, textAlign: 'center', padding: '8px 0' }}>
-            Chargement…
-          </p>
+          <p className="feed-suite" role="status">Chargement…</p>
         )}
-
-        {/* Espace pour la BottomNav */}
-        <div style={{ height: 20 }} />
       </div>
     </div>
   )

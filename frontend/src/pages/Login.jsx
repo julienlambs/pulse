@@ -1,16 +1,5 @@
 import { useState } from 'react'
-
-const INPUT = {
-  background: 'var(--bg)',
-  border: '1px solid var(--border)',
-  color: 'var(--text)',
-  borderRadius: 8,
-  padding: '12px 14px',
-  fontSize: 15,
-  width: '100%',
-  outline: 'none',
-  fontFamily: 'JetBrains Mono, monospace',
-}
+import { Btn, Field } from '@declic/ui'
 
 export default function Login({ onLogin }) {
   const [password, setPassword] = useState('')
@@ -33,77 +22,29 @@ export default function Login({ onLogin }) {
       localStorage.setItem('pulse_token', token)
       onLogin(token)
     } catch {
-      setError('Erreur réseau')
+      setError('Erreur réseau : vérifie la connexion et réessaie.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100%',
-      padding: '0 32px',
-    }}>
-      <span style={{
-        fontFamily: 'JetBrains Mono, monospace',
-        fontWeight: 600,
-        fontSize: 36,
-        color: 'var(--accent)',
-        marginBottom: 8,
-      }}>
-        Pulse
-      </span>
+    <main className="connexion">
+      <h1 className="h-page">Pulse</h1>
+      <p className="connexion-sous">Ta veille tech, au même endroit.</p>
 
-      <p style={{
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 12,
-        color: 'var(--muted)',
-        marginBottom: 40,
-        letterSpacing: '0.06em',
-        textTransform: 'uppercase',
-      }}>
-        Admin
-      </p>
-
-      <form onSubmit={handleSubmit} style={{ width: '100%', maxWidth: 340, display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <input
+      <form onSubmit={handleSubmit} className="connexion-form">
+        <Field
+          label="Mot de passe"
           type="password"
-          placeholder="Mot de passe"
+          autoComplete="current-password"
           value={password}
-          onChange={e => setPassword(e.target.value)}
-          style={INPUT}
+          onChange={e => { setPassword(e.target.value); setError(null) }}
+          error={error}
           autoFocus
         />
-
-        {error && (
-          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--hi)', margin: 0 }}>
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          disabled={!password || loading}
-          style={{
-            padding: '12px',
-            borderRadius: 10,
-            border: 'none',
-            background: password && !loading ? 'var(--accent)' : 'var(--border)',
-            color: password && !loading ? '#fff' : 'var(--muted)',
-            fontSize: 14,
-            fontWeight: 600,
-            fontFamily: 'JetBrains Mono, monospace',
-            cursor: password && !loading ? 'pointer' : 'default',
-            transition: 'all 0.12s',
-          }}
-        >
-          {loading ? '…' : 'Entrer'}
-        </button>
+        <Btn type="submit" full disabled={!password} loading={loading}>Entrer</Btn>
       </form>
-    </div>
+    </main>
   )
 }

@@ -1,11 +1,12 @@
 import { useState } from 'react'
+import { ChampDate, SelectField } from '@declic/ui'
 
 const PRESETS = [
-  { id: 'week',   label: 'Cette semaine' },
-  { id: 'today',  label: "Aujourd'hui" },
-  { id: 'month',  label: 'Ce mois' },
+  { id: 'week',    label: 'Cette semaine' },
+  { id: 'today',   label: 'Aujourd’hui' },
+  { id: 'month',   label: 'Ce mois' },
   { id: '3months', label: '3 derniers mois' },
-  { id: 'custom', label: 'Période personnalisée' },
+  { id: 'custom',  label: 'Période personnalisée' },
 ]
 
 function getRange(id) {
@@ -27,68 +28,33 @@ function getRange(id) {
   return { date_from: null, date_to: null }
 }
 
-const SELECT = {
-  background: 'var(--bg)',
-  border: '1px solid var(--border)',
-  color: 'var(--text)',
-  borderRadius: 8,
-  padding: '6px 10px',
-  fontSize: 12,
-  fontFamily: 'JetBrains Mono, monospace',
-  cursor: 'pointer',
-  outline: 'none',
-}
-
-const DATE_INPUT = {
-  background: 'var(--bg)',
-  border: '1px solid var(--border)',
-  color: 'var(--text)',
-  borderRadius: 8,
-  padding: '6px 10px',
-  fontSize: 12,
-  fontFamily: 'JetBrains Mono, monospace',
-  outline: 'none',
-}
-
 export default function DateFilter({ onChange }) {
   const [preset, setPreset] = useState('week')
-  const [customFrom, setCustomFrom] = useState('')
-  const [customTo, setCustomTo]     = useState('')
+  const [custom, setCustom] = useState({ from: '', to: '' })
 
   function handlePreset(id) {
     setPreset(id)
-    if (id !== 'custom') {
-      onChange(getRange(id))
-    }
+    if (id !== 'custom') onChange(getRange(id))
   }
 
-  function handleCustomChange(from, to) {
-    if (from || to) onChange({ date_from: from || null, date_to: to || null })
+  function handleCustom(key, iso) {
+    const next = { ...custom, [key]: iso || '' }
+    setCustom(next)
+    if (next.from || next.to) onChange({ date_from: next.from || null, date_to: next.to || null })
   }
 
   return (
-    <div style={{ padding: '4px 16px 10px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <select value={preset} onChange={e => handlePreset(e.target.value)} style={SELECT}>
+    <>
+      <SelectField id="sauv-periode" label="Période" value={preset} onChange={e => handlePreset(e.target.value)} data-menu="">
         {PRESETS.map(p => <option key={p.id} value={p.id}>{p.label}</option>)}
-      </select>
+      </SelectField>
 
       {preset === 'custom' && (
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <input
-            type="date"
-            value={customFrom}
-            onChange={e => { setCustomFrom(e.target.value); handleCustomChange(e.target.value, customTo) }}
-            style={{ ...DATE_INPUT, flex: 1 }}
-          />
-          <span style={{ color: 'var(--muted)', fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }}>→</span>
-          <input
-            type="date"
-            value={customTo}
-            onChange={e => { setCustomTo(e.target.value); handleCustomChange(customFrom, e.target.value) }}
-            style={{ ...DATE_INPUT, flex: 1 }}
-          />
+        <div className="sauv-dates">
+          <ChampDate id="sauv-du" label="Du" onDate={iso => handleCustom('from', iso)} />
+          <ChampDate id="sauv-au" label="Au" onDate={iso => handleCustom('to', iso)} />
         </div>
       )}
-    </div>
+    </>
   )
 }

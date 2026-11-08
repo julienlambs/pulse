@@ -1,12 +1,15 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { Banniere, Btn, Field, Reveal, SelectField, useSurface } from '@declic/ui'
 import { apiFetch } from '../../lib/api'
 
 const TYPES = ['rss', 'reddit', 'bluesky', 'youtube']
+const TYPE_LABELS = { rss: 'RSS', reddit: 'Reddit', bluesky: 'Bluesky', youtube: 'YouTube' }
 const TABS  = [
-  { id: 'ai_product', label: 'IA Produit/PM' },
-  { id: 'ux_product', label: 'UX & Product' },
-  { id: 'tech',       label: 'Tech général' },
-  { id: 'hardware',   label: 'Hardware & Actu' },
+  { id: 'ai_product', label: 'IA Produit' },
+  { id: 'ux_product', label: 'UX & Produit' },
+  { id: 'tech',       label: 'Tech' },
+  { id: 'hardware',   label: 'Hardware' },
   { id: 'video',      label: 'Vidéo' },
 ]
 const LANGS = [
@@ -15,31 +18,7 @@ const LANGS = [
   { id: 'en',  label: 'EN' },
 ]
 
-const INPUT = {
-  background: 'var(--bg)',
-  border: '1px solid var(--border)',
-  color: 'var(--text)',
-  borderRadius: 8,
-  padding: '8px 10px',
-  fontSize: 13,
-  width: '100%',
-  outline: 'none',
-  fontFamily: 'JetBrains Mono, monospace',
-  boxSizing: 'border-box',
-}
-
-const LABEL = {
-  fontFamily: 'JetBrains Mono, monospace',
-  fontSize: 10,
-  fontWeight: 700,
-  letterSpacing: '0.08em',
-  textTransform: 'uppercase',
-  color: 'var(--muted)',
-  marginBottom: 4,
-  display: 'block',
-}
-
-export default function SourceForm({ source, token, onSave, onClose }) {
+export default function SourceForm({ open, source, token, onSave, onClose }) {
   const isEdit = !!source
   const [form, setForm] = useState({
     name:        source?.name        || '',
@@ -56,6 +35,8 @@ export default function SourceForm({ source, token, onSave, onClose }) {
   const [error, setError]         = useState(null)
 
   const canSave = form.name && form.url && !saving
+  const premier = useRef(null)
+  useSurface(open, onClose, premier)
 
   function set(key, val) {
     setForm(prev => ({ ...prev, [key]: val }))
@@ -75,7 +56,7 @@ export default function SourceForm({ source, token, onSave, onClose }) {
           headers: { Authorization: `Bearer ${token}` },
         })
         const data = await r.json()
-        setTestResult(data.error ? `Erreur : ${data.error}` : `${data.count} nouveaux articles`)
+        setTestResult(data.error ? `Erreur : ${data.error}` : `${data.count} nouveaux articles`)
       } else {
         // Créer temporairement et tester — on teste en créant une source temporaire
         const r = await apiFetch('/api/sources', {
@@ -95,7 +76,7 @@ export default function SourceForm({ source, token, onSave, onClose }) {
           headers: { Authorization: `Bearer ${token}` },
         })
         const fd = await fr.json()
-        setTestResult(fd.error ? `Erreur : ${fd.error}` : `${fd.count} articles trouvés`)
+        setTestResult(fd.error ? `Erreur : ${fd.error}` : `${fd.count} articles trouvés`)
         // Supprimer la source temporaire
         await apiFetch(`/api/sources/${newSrc.id}`, {
           method: 'DELETE',
@@ -144,141 +125,57 @@ export default function SourceForm({ source, token, onSave, onClose }) {
     }
   }
 
-  return (
+  const testErreur = testResult?.startsWith('Erreur')
+
+  return createPortal(
     <>
-      <div
-        onClick={onClose}
-        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)', zIndex: 60, animation: 'leeroy-fadeIn 0.15s ease' }}
-      />
-      <div
-        onClick={e => e.stopPropagation()}
-        style={{
-          position: 'fixed', bottom: 0, left: 0, right: 0,
-          zIndex: 61,
-          background: 'var(--card)',
-          borderRadius: '20px 20px 0 0',
-          padding: '0 20px 40px',
-          boxShadow: '0 -8px 48px rgba(0,0,0,0.5)',
-          animation: 'leeroy-slideUp 0.28s cubic-bezier(0.32,0.72,0,1)',
-          maxHeight: '90dvh',
-          overflowY: 'auto',
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '14px 0 16px' }}>
-          <div style={{ width: 36, height: 4, borderRadius: 2, background: 'var(--border-hi)' }} />
-        </div>
+      <div className={`scrim${open ? ' open' : ''}`} onClick={onClose} />
+      <div className="surface-bas">
+        <Reveal open={open} className="surface-bas-in">
+          <div className="sheet cs acc cut" role="dialog" aria-modal="true" aria-labelledby="source-t"><div className="in cut2 sheet-defile">
+            <div className="grab cut" />
+            <h2 className="h-card" id="source-t">{isEdit ? 'Modifier la source' : 'Ajouter une source'}</h2>
 
-        <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 18, fontWeight: 600, color: 'var(--text)', margin: '0 0 20px' }}>
-          {isEdit ? 'Modifier la source' : 'Ajouter une source'}
-        </p>
+            <form className="source-form" onSubmit={e => { e.preventDefault(); handleSave() }}>
+              <Field label="Nom" value={form.name} onChange={e => set('name', e.target.value)} />
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div>
-            <span style={LABEL}>Nom</span>
-            <input style={INPUT} value={form.name} onChange={e => set('name', e.target.value)} placeholder="Ex : Lenny's Newsletter" />
-          </div>
+              <div className="source-form-ligne">
+                <SelectField id="source-type" label="Type" value={form.type} onChange={e => set('type', e.target.value)} data-menu="">
+                  {TYPES.map(t => <option key={t} value={t}>{TYPE_LABELS[t]}</option>)}
+                </SelectField>
+                <SelectField id="source-langue" label="Langue" value={form.lang_filter} onChange={e => set('lang_filter', e.target.value)} data-menu="">
+                  {LANGS.map(l => <option key={l.id} value={l.id}>{l.label}</option>)}
+                </SelectField>
+              </div>
 
-          <div style={{ display: 'flex', gap: 10 }}>
-            <div style={{ flex: 1 }}>
-              <span style={LABEL}>Type</span>
-              <select style={{ ...INPUT }} value={form.type} onChange={e => set('type', e.target.value)}>
-                {TYPES.map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
-              </select>
-            </div>
-            <div style={{ flex: 1 }}>
-              <span style={LABEL}>Langue</span>
-              <select style={{ ...INPUT }} value={form.lang_filter} onChange={e => set('lang_filter', e.target.value)}>
-                {LANGS.map(l => <option key={l.id} value={l.id}>{l.label}</option>)}
-              </select>
-            </div>
-          </div>
+              <Field label="URL ou handle" inputMode="url" value={form.url} onChange={e => set('url', e.target.value)}
+                help="Ex. : https://…/feed ou handle.bsky.social" />
 
-          <div>
-            <span style={LABEL}>URL ou handle</span>
-            <input style={INPUT} value={form.url} onChange={e => set('url', e.target.value)} placeholder="https://... ou handle.bsky.social" />
-          </div>
+              <SelectField id="source-onglet" label="Onglet de destination" value={form.tab} onChange={e => set('tab', e.target.value)} data-menu="">
+                {TABS.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+              </SelectField>
 
-          <div>
-            <span style={LABEL}>Onglet de destination</span>
-            <select style={{ ...INPUT }} value={form.tab} onChange={e => set('tab', e.target.value)}>
-              {TABS.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
-            </select>
-          </div>
+              <Field label="Mots-clés à inclure" value={form.keywords} onChange={e => set('keywords', e.target.value)}
+                help="Facultatif, séparés par des virgules. Ex. : IA, product, design" />
+              <Field label="Mots-clés à exclure" value={form.exclude_keywords} onChange={e => set('exclude_keywords', e.target.value)}
+                help="Facultatif, séparés par des virgules. Ex. : bon plan, promo, soldes" />
 
-          <div>
-            <span style={LABEL}>Mots-clés à inclure (optionnel, séparés par virgules)</span>
-            <input style={INPUT} value={form.keywords} onChange={e => set('keywords', e.target.value)} placeholder="Ex : IA, product, design" />
-          </div>
+              {testResult && (
+                <Banniere ton={testErreur ? 'hi' : 'lo'}>{testResult}</Banniere>
+              )}
+              {error && <Banniere ton="hi">{error}</Banniere>}
 
-          <div>
-            <span style={LABEL}>Mots-clés à exclure (optionnel, séparés par virgules)</span>
-            <input style={INPUT} value={form.exclude_keywords} onChange={e => set('exclude_keywords', e.target.value)} placeholder="Ex : bon plan, promo, soldes" />
-          </div>
-
-          {testResult && (
-            <p style={{
-              fontFamily: 'JetBrains Mono, monospace',
-              fontSize: 12,
-              color: testResult.startsWith('Erreur') ? 'var(--hi)' : 'var(--lo)',
-              margin: 0,
-              padding: '8px 10px',
-              background: 'var(--card-2)',
-              borderRadius: 6,
-            }}>
-              {testResult}
-            </p>
-          )}
-
-          {error && (
-            <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--hi)', margin: 0 }}>
-              {error}
-            </p>
-          )}
-
-          <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
-            <button
-              onClick={handleTest}
-              disabled={!form.url || testing}
-              style={{
-                flex: 1,
-                padding: '10px',
-                borderRadius: 10,
-                border: '1px solid var(--border)',
-                background: 'transparent',
-                color: form.url && !testing ? 'var(--text)' : 'var(--muted)',
-                fontFamily: 'JetBrains Mono, monospace',
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: form.url && !testing ? 'pointer' : 'default',
-                WebkitTapHighlightColor: 'transparent',
-              }}
-            >
-              {testing ? '…' : 'Tester'}
-            </button>
-
-            <button
-              onClick={handleSave}
-              disabled={!canSave}
-              style={{
-                flex: 2,
-                padding: '10px',
-                borderRadius: 10,
-                border: 'none',
-                background: canSave ? 'var(--accent)' : 'var(--border)',
-                color: canSave ? '#fff' : 'var(--muted)',
-                fontFamily: 'JetBrains Mono, monospace',
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: canSave ? 'pointer' : 'default',
-                transition: 'all 0.12s',
-                WebkitTapHighlightColor: 'transparent',
-              }}
-            >
-              {saving ? '…' : 'Sauvegarder'}
-            </button>
-          </div>
-        </div>
+              <div className="source-form-actions">
+                <Btn kind="sec" type="button" ref={premier} onClick={onClose}>Annuler</Btn>
+                <span className="bh-esp" />
+                <Btn kind="sec" type="button" disabled={!form.url} loading={testing} onClick={handleTest}>Tester</Btn>
+                <Btn type="submit" disabled={!canSave} loading={saving}>Enregistrer</Btn>
+              </div>
+            </form>
+          </div></div>
+        </Reveal>
       </div>
-    </>
+    </>,
+    document.body,
   )
 }

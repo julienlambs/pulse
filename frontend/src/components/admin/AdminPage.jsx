@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { BarreHaut, IconBtn, Icone, RichListSkeleton, Viseur, useSkeleton } from '@declic/ui'
 import { apiFetch } from '../../lib/api'
 import SourceCard from './SourceCard'
 import SourceForm from './SourceForm'
@@ -8,6 +9,8 @@ export default function AdminPage({ token, onBack, onLogout }) {
   const [loading, setLoading]   = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editSource, setEditSource] = useState(null)
+  const [formKey, setFormKey]   = useState(0)
+  const skOn = useSkeleton(loading)
 
   useEffect(() => {
     loadSources()
@@ -55,9 +58,14 @@ export default function AdminPage({ token, onBack, onLogout }) {
     setSources(prev => prev.filter(s => s.id !== id))
   }
 
-  function handleEdit(source) {
+  function openForm(source) {
     setEditSource(source)
+    setFormKey(k => k + 1) // formulaire remis à neuf à chaque ouverture
     setShowForm(true)
+  }
+
+  function handleEdit(source) {
+    openForm(source)
   }
 
   function handleFormSave(savedSource) {
@@ -66,12 +74,10 @@ export default function AdminPage({ token, onBack, onLogout }) {
       return exists ? prev.map(s => s.id === savedSource.id ? savedSource : s) : [savedSource, ...prev]
     })
     setShowForm(false)
-    setEditSource(null)
   }
 
   function handleFormClose() {
     setShowForm(false)
-    setEditSource(null)
   }
 
   const grouped = ['ai_product', 'ux_product', 'tech', 'hardware', 'video'].reduce((acc, tab) => {
@@ -79,70 +85,28 @@ export default function AdminPage({ token, onBack, onLogout }) {
     return acc
   }, {})
 
-  const TAB_LABELS = { ai_product: 'IA Produit/PM', ux_product: 'UX & Product', tech: 'Tech', hardware: 'Hardware', video: 'Vidéo' }
+  const TAB_LABELS = { ai_product: 'IA Produit', ux_product: 'UX & Produit', tech: 'Tech', hardware: 'Hardware', video: 'Vidéo' }
 
   return (
-    <div style={{ minHeight: '100%', paddingBottom: 80 }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', padding: '12px 16px 8px', gap: 12 }}>
-        <button
-          onClick={onBack}
-          style={{ background: 'none', border: 'none', color: 'var(--muted)', fontSize: 22, cursor: 'pointer', padding: '4px', lineHeight: 1 }}
-        >
-          ←
-        </button>
-        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 600, fontSize: 18, color: 'var(--text)', flex: 1 }}>
-          Admin
-        </span>
-        <span style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 11,
-          padding: '2px 8px',
-          borderRadius: 6,
-          background: 'var(--accent-soft)',
-          color: 'var(--accent)',
-        }}>
-          {sources.length} sources
-        </span>
-        <button
-          onClick={onLogout}
-          style={{
-            fontFamily: 'JetBrains Mono, monospace',
-            fontSize: 11,
-            padding: '4px 10px',
-            borderRadius: 6,
-            border: '1px solid var(--border)',
-            background: 'transparent',
-            color: 'var(--muted)',
-            cursor: 'pointer',
-          }}
-        >
-          Déconnexion
-        </button>
-      </div>
+    <>
+      <BarreHaut
+        menu={<IconBtn className="bw vfw ibtn" kind="ghost" label="Retour au fil" icon={<Icone nom="retour" />} onClick={onBack} />}
+        titre="Admin"
+        actions={<>
+          <span className="badge cut bg-acc">{sources.length} sources</span>
+          <IconBtn className="bw vfw ibtn" kind="ghost" label="Se déconnecter" icon={<Icone nom="deconnexion" />} onClick={onLogout} />
+        </>}
+      />
 
-      {/* Liste par onglet */}
-      <div style={{ padding: '8px 12px 0' }}>
+      <div className="admin">
         {loading ? (
-          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: 'var(--muted)', textAlign: 'center', paddingTop: 32 }}>
-            Chargement…
-          </p>
+          <RichListSkeleton rows={4} visible={skOn} message="Chargement des sources…" />
         ) : (
           Object.entries(grouped).map(([tab, tabSources]) => (
             tabSources.length > 0 && (
-              <div key={tab} style={{ marginBottom: 24 }}>
-                <p style={{
-                  fontFamily: 'JetBrains Mono, monospace',
-                  fontSize: 10,
-                  fontWeight: 700,
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  color: 'var(--muted)',
-                  margin: '0 0 10px 4px',
-                }}>
-                  {TAB_LABELS[tab]}
-                </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <section key={tab} className="admin-groupe" aria-labelledby={`grp-${tab}`}>
+                <h2 className="h-sub" id={`grp-${tab}`}>{TAB_LABELS[tab]}</h2>
+                <div className="admin-liste">
                   {tabSources.map(source => (
                     <SourceCard
                       key={source.id}
@@ -154,47 +118,27 @@ export default function AdminPage({ token, onBack, onLogout }) {
                     />
                   ))}
                 </div>
-              </div>
+              </section>
             )
           ))
         )}
       </div>
 
-      {/* FAB */}
-      <button
-        onClick={() => { setEditSource(null); setShowForm(true) }}
-        style={{
-          position: 'fixed',
-          bottom: 24,
-          right: 20,
-          width: 52,
-          height: 52,
-          borderRadius: '50%',
-          background: 'var(--accent)',
-          border: 'none',
-          color: '#fff',
-          fontSize: 28,
-          cursor: 'pointer',
-          boxShadow: '0 4px 20px rgba(96,80,220,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          lineHeight: 1,
-          WebkitTapHighlightColor: 'transparent',
-          zIndex: 30,
-        }}
-      >
-        +
+      {/* Bouton flottant : l'ombre sur l'enveloppe non coupée, la forme coupée dedans */}
+      <button type="button" className="bw vfw ibtn fab" aria-label="Ajouter une source" data-tip="Ajouter une source"
+        onClick={() => openForm(null)}>
+        <span className="b pri cut"><span className="cut2"><Icone nom="ajouter" taille={20} /></span></span>
+        <Viseur />
       </button>
 
-      {showForm && (
-        <SourceForm
-          source={editSource}
-          token={token}
-          onSave={handleFormSave}
-          onClose={handleFormClose}
-        />
-      )}
-    </div>
+      <SourceForm
+        key={formKey}
+        open={showForm}
+        source={editSource}
+        token={token}
+        onSave={handleFormSave}
+        onClose={handleFormClose}
+      />
+    </>
   )
 }

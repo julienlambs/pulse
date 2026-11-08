@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useTheme, useViseurFocus, SphinxBackground } from '@declic/ui'
 import { apiFetch } from './lib/api'
 import Header from './components/layout/Header'
-import BottomNav from './components/layout/BottomNav'
+import BottomNav, { MenuOnglets } from './components/layout/BottomNav'
 import FeedTab from './components/feed/FeedTab'
 import Reader from './components/reader/Reader'
 import SavedPage from './pages/SavedPage'
@@ -74,69 +74,55 @@ export default function App() {
 
   if (!authToken) {
     return (
-      <div style={{ height: '100dvh' }}>
+      <>
         <SphinxBackground />
         <Login onLogin={handleLogin} />
-      </div>
+      </>
     )
   }
 
-  const showHeader  = page === 'feed'
-  const showNavBar  = page === 'feed'
+  const onFeed = page === 'feed'
 
   return (
-    <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <>
       <SphinxBackground />
-      {showHeader && (
-        <Header
-          onSavedClick={() => setPage('saved')}
-          onAdminClick={handleAdminClick}
-        />
-      )}
+      {/* Lecteur ouvert : la coquille reste montée (état du feed, position de défilement), mais cachée et inerte */}
+      <div className="coquille" inert={currentItem ? '' : undefined} style={currentItem ? { visibility: 'hidden' } : undefined}>
+        {onFeed && <MenuOnglets activeTab={activeTab} onTabChange={setActiveTab} />}
+        <div className="coquille-col">
+          <main ref={mainRef} className="coquille-main">
+            {onFeed && (
+              <>
+                <Header onSavedClick={() => setPage('saved')} onAdminClick={handleAdminClick} />
+                <FeedTab
+                  key={activeTab}
+                  tab={activeTab}
+                  sourcesMap={sourcesMap}
+                  savedOverrides={savedOverrides}
+                  onItemClick={handleItemClick}
+                />
+              </>
+            )}
 
-      <main
-        ref={mainRef}
-        style={{
-          flex: 1,
-          overflowY: 'auto',
-          marginTop: showHeader ? 56 : 0,
-          marginBottom: showNavBar ? 60 : 0,
-        }}
-      >
-        {page === 'feed' && (
-          <FeedTab
-            key={activeTab}
-            tab={activeTab}
-            sourcesMap={sourcesMap}
-            savedOverrides={savedOverrides}
-            onItemClick={handleItemClick}
-          />
-        )}
+            {page === 'saved' && (
+              <SavedPage
+                sourcesMap={sourcesMap}
+                onBack={handleBackToFeed}
+                onItemClick={handleItemClick}
+              />
+            )}
 
-        {page === 'saved' && (
-          <SavedPage
-            sourcesMap={sourcesMap}
-            onBack={handleBackToFeed}
-            onItemClick={handleItemClick}
-          />
-        )}
-
-        {page === 'login' && (
-          <Login onLogin={handleLogin} />
-        )}
-
-        {page === 'admin' && (
-          <AdminPage
-            token={authToken}
-            onBack={handleBackToFeed}
-            onLogout={handleLogout}
-          />
-        )}
-      </main>
-
-      {showNavBar && (
-        <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
-      )}
+            {page === 'admin' && (
+              <AdminPage
+                token={authToken}
+                onBack={handleBackToFeed}
+                onLogout={handleLogout}
+              />
+            )}
+          </main>
+          {onFeed && <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />}
+        </div>
+      </div>
 
       {currentItem && (
         <Reader
@@ -146,6 +132,6 @@ export default function App() {
           onSaveUpdate={handleSaveUpdateFromReader}
         />
       )}
-    </div>
+    </>
   )
 }

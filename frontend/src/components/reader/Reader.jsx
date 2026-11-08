@@ -1,38 +1,16 @@
 import { useState, useEffect } from 'react'
 import { apiFetch } from '../../lib/api'
-import FontSizePicker from './FontSizePicker'
-
-const TYPE_BADGE = {
-  rss:     { bg: 'var(--accent-soft)',         color: 'var(--accent)' },
-  reddit:  { bg: 'rgba(255,122,107,0.12)',      color: 'var(--hi)' },
-  bluesky: { bg: 'rgba(107,203,156,0.12)',      color: 'var(--lo)' },
-  youtube: { bg: 'rgba(255,122,107,0.15)',      color: 'var(--hi)' },
-}
-
-const BTN = {
-  background: 'none',
-  border: 'none',
-  color: 'var(--muted)',
-  fontSize: 20,
-  cursor: 'pointer',
-  padding: '6px 8px',
-  borderRadius: 8,
-  lineHeight: 1,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  WebkitTapHighlightColor: 'transparent',
-  textDecoration: 'none',
-}
+import { IconBtn, Icone, Viseur } from '@declic/ui'
+import FontSizePicker, { SIZES } from './FontSizePicker'
+import { badgeClass, TYPE_LABEL } from '../feed/sourceBadge'
 
 export default function Reader({ item, sourceName, onBack, onSaveUpdate }) {
   const [saved, setSaved] = useState(item.is_saved)
-  const [fontSize, setFontSize] = useState(
-    () => parseInt(localStorage.getItem('pulse_reader_fontsize') || '16')
-  )
+  const [fontSize, setFontSize] = useState(() => {
+    const v = parseInt(localStorage.getItem('pulse_reader_fontsize') || '18')
+    return SIZES.some(s => s.valeur === v) ? v : 18 // anciennes tailles (14/16/19) : retour à M
+  })
   const [showFontPicker, setShowFontPicker] = useState(false)
-
-  const badge = TYPE_BADGE[item.type] || TYPE_BADGE.rss
 
   useEffect(() => {
     window.history.pushState({ reader: true }, '')
@@ -51,7 +29,6 @@ export default function Reader({ item, sourceName, onBack, onSaveUpdate }) {
   function handleFontSize(size) {
     setFontSize(size)
     localStorage.setItem('pulse_reader_fontsize', String(size))
-    setShowFontPicker(false)
   }
 
   const pubDate = item.published_at
@@ -59,142 +36,52 @@ export default function Reader({ item, sourceName, onBack, onSaveUpdate }) {
     : ''
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0,
-      background: 'var(--bg)',
-      zIndex: 50,
-      display: 'flex',
-      flexDirection: 'column',
-      overflowY: 'auto',
-    }}>
-      {/* Header */}
-      <header style={{
-        position: 'sticky', top: 0,
-        background: 'var(--header-bg)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        borderBottom: '1px solid var(--border)',
-        height: 56,
-        display: 'flex',
-        alignItems: 'center',
-        padding: '0 16px',
-        gap: 4,
-        zIndex: 51,
-        flexShrink: 0,
-      }}>
-        <button onClick={() => window.history.back()} style={{ ...BTN, fontSize: 22 }}>←</button>
-        <div style={{ flex: 1 }} />
-        <button
-          onClick={() => setShowFontPicker(true)}
-          style={{ ...BTN, fontFamily: 'Georgia, serif', fontWeight: 700, fontSize: 16, letterSpacing: '-0.02em' }}
-        >
-          Aa
-        </button>
-        <button
-          onClick={handleSave}
-          style={{ ...BTN, color: saved ? 'var(--accent)' : 'var(--muted)' }}
-        >
-          <svg width="14" height="17" viewBox="0 0 13 16" fill={saved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg">
-            <path d="M1.5 1.5h10v13l-5-3-5 3V1.5z"/>
-          </svg>
-        </button>
-        <a
-          href={item.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ ...BTN, fontSize: 18 }}
-        >
-          ↗
+    <div className="lecteur">
+      {/* Barre du haut de la charte (.bh), sans titre : le titre de la page est celui de l'article */}
+      <header className="bh">
+        <IconBtn className="bw vfw ibtn" kind="ghost" label="Retour au fil" icon={<Icone nom="retour" />} onClick={() => window.history.back()} />
+        <span className="bh-esp" />
+        <IconBtn className="bw vfw ibtn" kind="ghost" label="Taille du texte" icon={<Icone nom="police" />} onClick={() => setShowFontPicker(true)} />
+        <IconBtn className="bw vfw ibtn" kind="ghost" label={saved ? 'Retirer des sauvegardés' : 'Sauvegarder'} aria-pressed={saved}
+          icon={<span className={saved ? undefined : 'ic-muet'}><Icone nom="signet" /></span>} onClick={handleSave} />
+        <a className="bw vfw ibtn" href={item.url} target="_blank" rel="noopener noreferrer"
+          aria-label="Ouvrir l’article d’origine" data-tip="Ouvrir l’article d’origine">
+          <span className="b ghost cut"><span className="cut2"><Icone nom="lien-externe" /></span></span>
+          <Viseur />
         </a>
       </header>
 
-      {/* Contenu */}
-      <article style={{ padding: '24px 20px 80px', maxWidth: 680, width: '100%', margin: '0 auto' }}>
-        {/* Meta */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
-          <span style={{
-            fontFamily: 'JetBrains Mono, monospace',
-            fontSize: 10.5,
-            fontWeight: 700,
-            padding: '2px 7px',
-            borderRadius: 6,
-            background: badge.bg,
-            color: badge.color,
-          }}>
-            {sourceName || item.type.toUpperCase()}
-          </span>
-          {pubDate && (
-            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--muted)' }}>
-              {pubDate}
-            </span>
-          )}
+      <article className="lecteur-article">
+        <div className="lecteur-meta">
+          <span className={badgeClass(item.type)}>{sourceName || TYPE_LABEL[item.type] || item.type}</span>
+          {pubDate && <span>{pubDate}</span>}
         </div>
 
-        {/* Titre */}
-        <h1 style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontWeight: 600,
-          fontSize: 27,
-          lineHeight: 1.18,
-          color: 'var(--text)',
-          margin: '0 0 28px',
-        }}>
-          {item.title}
-        </h1>
+        <h1 className="h-page lecteur-titre">{item.title}</h1>
 
-        {/* Corps */}
         {item.content ? (
           <div
-            className="reader-content"
-            style={{
-              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-              fontSize: fontSize,
-              lineHeight: 1.7,
-              color: 'var(--text)',
-            }}
+            className="prose reader-content"
+            style={{ fontSize }}
             dangerouslySetInnerHTML={{ __html: item.content }}
           />
         ) : (
-          <div style={{ paddingTop: 16 }}>
-            <p style={{
-              fontFamily: 'JetBrains Mono, monospace',
-              fontSize: 13,
-              color: 'var(--muted)',
-              marginBottom: 20,
-            }}>
-              Contenu complet non disponible en lecture intégrée.
-            </p>
-            <a
-              href={item.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '10px 18px',
-                borderRadius: 10,
-                background: 'var(--accent)',
-                color: '#fff',
-                fontFamily: 'JetBrains Mono, monospace',
-                fontSize: 13,
-                fontWeight: 600,
-                textDecoration: 'none',
-              }}
-            >
-              Ouvrir dans le navigateur ↗
+          <div className="lecteur-vide">
+            <p>Contenu complet non disponible en lecture intégrée.</p>
+            <a className="bw vfw" href={item.url} target="_blank" rel="noopener noreferrer">
+              <span className="b pri cut"><span className="cut2">Ouvrir dans le navigateur <Icone nom="lien-externe" /></span></span>
+              <Viseur />
             </a>
           </div>
         )}
       </article>
 
-      {showFontPicker && (
-        <FontSizePicker
-          value={fontSize}
-          onChange={handleFontSize}
-          onClose={() => setShowFontPicker(false)}
-        />
-      )}
+      <FontSizePicker
+        open={showFontPicker}
+        value={fontSize}
+        onChange={handleFontSize}
+        onClose={() => setShowFontPicker(false)}
+      />
     </div>
   )
 }
