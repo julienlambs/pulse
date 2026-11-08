@@ -7,6 +7,10 @@
 .coquille-col { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .coquille-main { flex: 1; min-height: 0; overflow-y: auto; }
 
+/* Icônes de la barre du haut : 22 px comme la barre du bas (charte : 20 à 24 px dans une barre ;
+   sans réglage, IconBtn les laisse à la taille du texte du bouton, 14 px) */
+.bh .ibtn svg { width: 22px; height: 22px; }
+
 /* ── Connexion ─────────────────────────────────────────────────────────── */
 .connexion { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100dvh;
   padding: 0 var(--s-8); box-sizing: border-box; text-align: center; }
