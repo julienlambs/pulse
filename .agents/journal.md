@@ -3,7 +3,7 @@
 ## Session 4 — 08/11/2026 — [claude] Migration vers Le Déclic 1.21.0
 
 ### Ce qui a été fait
-- Branche `declic-1.21` (pas encore poussée ni déployée). `AGENTS.md` et `.agents/` versionnés et réécrits : Pulse suit la charte Le Déclic, bleu seul, plus d'identité Leeroy (copie historique archivée dans `_archive/`, ignorée par git).
+- Branche `declic-1.21`, fusionnée dans `master` et déployée sur le NAS le 08/11/2026. `AGENTS.md` et `.agents/` versionnés et réécrits : Pulse suit la charte Le Déclic, bleu seul, plus d'identité Leeroy (copie historique archivée dans `_archive/`, ignorée par git).
 - Lot 1 : `index.css` 1.21.0 + `fonts/` copiés depuis `D:/Projets/design-system/`, paquet `@declic/ui` dans `frontend/vendor/` (copié avant `npm ci` dans le Dockerfile), thème par `useTheme()` du paquet, fond sphinx à la place du fond hexagonal violet.
 - Lots 2 à 4 (un seul passage : tout était en styles en ligne) : chaque écran refait avec les briques du paquet — barre du haut, barre du bas sur téléphone et menu latéral au-delà de 600 px, cartes coupées à lien étiré, boutons groupés et puces pour les filtres, squelette, état vide, bannière d'erreur, lecteur en `.prose` (Quattro), panneaux du bas (`Reveal` + `useSurface`), confirmation de la charte pour supprimer une source, icônes `<Icone>`. CSS propre à Pulse dans `src/app.css`, uniquement des jetons.
 - Audit `audit-charte.py` : 283 écarts → 3 (dans la copie d'`index.css`, côté charte).
