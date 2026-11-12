@@ -90,17 +90,19 @@ export default function App() {
       <div className="coquille" inert={currentItem ? '' : undefined} style={currentItem ? { visibility: 'hidden' } : undefined}>
         {onFeed && <MenuOnglets activeTab={activeTab} onTabChange={setActiveTab} />}
         <div className="coquille-col">
-          <main ref={mainRef} className="coquille-main">
+          <main className="coquille-main">
             {onFeed && (
               <>
                 <Header onSavedClick={() => setPage('saved')} onAdminClick={handleAdminClick} />
-                <FeedTab
-                  key={activeTab}
-                  tab={activeTab}
-                  sourcesMap={sourcesMap}
-                  savedOverrides={savedOverrides}
-                  onItemClick={handleItemClick}
-                />
+                <div ref={mainRef} className="defile">
+                  <FeedTab
+                    key={activeTab}
+                    tab={activeTab}
+                    sourcesMap={sourcesMap}
+                    savedOverrides={savedOverrides}
+                    onItemClick={handleItemClick}
+                  />
+                </div>
               </>
             )}
 

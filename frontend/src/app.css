@@ -5,7 +5,10 @@
 /* ── Coquille : menu latéral (≥ 600 px) + colonne (barre du haut, contenu qui défile, barre du bas) ── */
 .coquille { display: flex; height: 100dvh; }
 .coquille-col { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.coquille-main { flex: 1; min-height: 0; overflow-y: auto; }
+/* main ne défile pas : la barre du haut reste hors de la zone qui défile (.defile), la barre de défilement commence dessous */
+.coquille-main { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.coquille-main > .bh { flex: none; }
+.defile { flex: 1; min-height: 0; overflow-y: auto; }
 
 /* Icônes de la barre du haut : 22 px comme la barre du bas (charte : 20 à 24 px dans une barre ;
    sans réglage, IconBtn les laisse à la taille du texte du bouton, 14 px) */

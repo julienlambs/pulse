@@ -98,6 +98,7 @@ export default function AdminPage({ token, onBack, onLogout }) {
         </>}
       />
 
+      <div className="defile">
       <div className="admin">
         {loading ? (
           <RichListSkeleton rows={4} visible={skOn} message="Chargement des sources…" />
@@ -122,6 +123,7 @@ export default function AdminPage({ token, onBack, onLogout }) {
             )
           ))
         )}
+      </div>
       </div>
 
       {/* Bouton flottant : l'ombre sur l'enveloppe non coupée, la forme coupée dedans */}

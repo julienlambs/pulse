@@ -100,6 +100,7 @@ export default function SavedPage({ sourcesMap, onBack, onItemClick }) {
         actions={total > 0 && <span className="badge cut bg-acc" aria-label={`${total} articles`}>{total}</span>}
       />
 
+      <div className="defile">
       <div className="sauv-filtres">
         <TabFilter value={tab} onChange={handleTabChange} />
         <DateFilter onChange={handleDateChange} />
@@ -136,6 +137,7 @@ export default function SavedPage({ sourcesMap, onBack, onItemClick }) {
         {loading && items.length > 0 && (
           <p className="feed-suite" role="status">Chargement…</p>
         )}
+      </div>
       </div>
     </>
   )
