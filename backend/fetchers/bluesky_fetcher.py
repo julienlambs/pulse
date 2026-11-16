@@ -4,6 +4,8 @@ from datetime import datetime
 import httpx
 from langdetect import detect, LangDetectException
 
+from fetchers import insert_item
+
 logger = logging.getLogger("pulse.bluesky")
 
 BSKY_API = "https://public.api.bsky.app/xrpc"
@@ -85,7 +87,8 @@ def fetch_bluesky(source, db):
             post_rkey = external_id.split("/")[-1]
             url = f"https://bsky.app/profile/{handle}/post/{post_rkey}"
 
-            item = Item(
+            if insert_item(
+                db,
                 source_id=source.id,
                 tab=source.tab,
                 type="bluesky",
@@ -98,9 +101,8 @@ def fetch_bluesky(source, db):
                 published_at=published_at,
                 fetched_at=datetime.utcnow(),
                 external_id=external_id,
-            )
-            db.add(item)
-            count += 1
+            ):
+                count += 1
 
         db.commit()
         return count, None

@@ -4,6 +4,8 @@ from datetime import datetime
 import feedparser
 import httpx
 
+from fetchers import insert_item
+
 logger = logging.getLogger("pulse.youtube")
 
 
@@ -57,7 +59,8 @@ def fetch_youtube(source, db):
 
             lang = source.lang_filter if source.lang_filter != "all" else "fr"
 
-            item = Item(
+            if insert_item(
+                db,
                 source_id=source.id,
                 tab=source.tab,
                 type="youtube",
@@ -71,9 +74,8 @@ def fetch_youtube(source, db):
                 published_at=published_at,
                 fetched_at=datetime.utcnow(),
                 external_id=external_id,
-            )
-            db.add(item)
-            count += 1
+            ):
+                count += 1
 
         db.commit()
         return count, None

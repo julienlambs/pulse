@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Index, Integer, String, Text
 from database import Base
 
 
@@ -22,6 +22,10 @@ class Source(Base):
 
 class Item(Base):
     __tablename__ = "items"
+    __table_args__ = (
+        # Un article n'existe qu'une fois par source (créé par migrate_unique_items sur une base existante)
+        Index("uq_items_source_external", "source_id", "external_id", unique=True),
+    )
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     source_id = Column(Integer, ForeignKey("sources.id"), nullable=False)

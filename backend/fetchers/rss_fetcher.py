@@ -7,6 +7,8 @@ import feedparser
 import httpx
 from langdetect import detect, LangDetectException
 
+from fetchers import insert_item
+
 logger = logging.getLogger("pulse.rss")
 
 
@@ -156,7 +158,8 @@ def fetch_rss(source, db):
             if not published_at:
                 published_at = datetime.utcnow()
 
-            item = Item(
+            if insert_item(
+                db,
                 source_id=source.id,
                 tab=source.tab,
                 type=source.type,
@@ -169,9 +172,8 @@ def fetch_rss(source, db):
                 published_at=published_at,
                 fetched_at=datetime.utcnow(),
                 external_id=external_id,
-            )
-            db.add(item)
-            count += 1
+            ):
+                count += 1
 
         db.commit()
         return count, None
