@@ -15,8 +15,6 @@ Les sources Bluesky sont volontairement vides au démarrage — à configurer vi
 | ActuIA | rss | https://www.actuia.com/feed/ | fr | |
 | TLDR AI | rss | https://tldr.tech/ai/rss | en | |
 | UX Collective | rss | https://uxdesign.cc/feed | en | AI, product, design |
-| r/MachineLearning | reddit | https://www.reddit.com/r/MachineLearning/.rss | en | |
-| r/artificial | reddit | https://www.reddit.com/r/artificial/.rss | en | |
 
 ---
 
@@ -27,8 +25,6 @@ Les sources Bluesky sont volontairement vides au démarrage — à configurer vi
 | Lenny's Newsletter | rss | https://www.lennysnewsletter.com/feed | en | |
 | Product Talk | rss | https://www.producttalk.org/feed/ | en | |
 | SVPG | rss | https://www.svpg.com/feed/ | en | |
-| r/ProductManagement | reddit | https://www.reddit.com/r/ProductManagement/.rss | en | |
-| r/UXDesign | reddit | https://www.reddit.com/r/UXDesign/.rss | en | |
 
 ---
 
@@ -40,8 +36,6 @@ Les sources Bluesky sont volontairement vides au démarrage — à configurer vi
 | Cafétech | rss | https://cafetech.fr/feed/ | fr | |
 | The Verge | rss | https://www.theverge.com/rss/index.xml | en | |
 | Hacker News | rss | https://news.ycombinator.com/rss | en | |
-| r/programming | reddit | https://www.reddit.com/r/programming/.rss | en | |
-| r/webdev | reddit | https://www.reddit.com/r/webdev/.rss | en | |
 
 ---
 
@@ -51,8 +45,6 @@ Les sources Bluesky sont volontairement vides au démarrage — à configurer vi
 |---|---|---|---|---|
 | Frandroid | rss | https://www.frandroid.com/feed | fr | |
 | Les Numériques | rss | https://www.lesnumeriques.com/rss.xml | fr | |
-| r/hardware | reddit | https://www.reddit.com/r/hardware/.rss | en | |
-| r/france | reddit | https://www.reddit.com/r/france/.rss | fr | tech, numérique, IA |
 
 ---
 
@@ -80,6 +72,6 @@ Aucun compte hardcodé. Les comptes Bluesky sont gérés exclusivement via l'int
 ## Notes de maintenance
 
 - Vérifier la validité des URLs RSS au premier lancement, certaines peuvent avoir changé
-- Les flux Reddit peuvent être lents, timeout à 10 secondes recommandé
+- Reddit retiré le 16/11/2026 : ses flux RSS refusent les lecteurs anonymes (HTTP 429), l'API .json répond 403
 - Frandroid et Les Numériques ont des flux très chargés, filtrage par mots-clés à affiner si trop de bruit
 - Les Channel ID YouTube sont stables, ils ne changent pas si la chaîne est renommée

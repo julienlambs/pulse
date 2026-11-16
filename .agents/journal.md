@@ -1,5 +1,39 @@
 # Journal — Pulse
 
+## Session 5 — 16/11/2026 — [claude] Corrections avant de rendre le dépôt public
+
+### Ce qui a été fait
+- Sécurité : jeton de session signé HMAC-SHA256, 30 jours (`PULSE_TOKEN_TTL_DAYS`), à la place de `PULSE_SECRET_KEY`
+  renvoyée telle quelle ; limite de tentatives au login (5 échecs / 15 min par IP, 50 toutes IP, 429 + Retry-After,
+  1 s par échec) ; CORS limité à l'app + Vite ; `/docs` coupé. Tout 401 renvoie à l'écran de connexion.
+- Données : index UNIQUE `(source_id, external_id)`, migration au démarrage (sauvegarde `pulse-avant-unique-AAAAMMJJ.db`,
+  2 doublons de prod fusionnés sur une copie). Insertion par `ON CONFLICT DO NOTHING`.
+- Reddit retiré (429 sur 7 subreddits sur 8 en prod), `reddit_fetcher.py` supprimé. Bluesky corrigé (liens des reposts,
+  mots-clés, langue, réponses écartées), bouton Tester plus clair, suppression d'une source = suppression de ses articles
+  non sauvegardés. Tests pytest (30). README + licence MIT.
+- Scan de secrets : gitleaks 8.30.1 + grep, rien. Historique à réécrire (e-mail personnel en auteur, e-mail dans les
+  lignes Co-Authored-By) avant publication.
+
+### Avec quoi ça communique
+- `/api/auth/login` renvoie `{token, expires_at}` ; même clé `pulse_token` en localStorage. Les anciens jetons (= ancienne
+  clé) sont refusés : reconnexion une fois après déploiement.
+
+### Décisions
+- Jeton HMAC maison (bibliothèque standard) plutôt que PyJWT : pas de nouvelle dépendance.
+- Reddit retiré plutôt que l'API OAuth (validation manuelle des apps par Reddit, issue incertaine). Choix de Julien.
+- Licence MIT pour le code ; polices et identité Le Déclic hors licence.
+
+### À faire par Julien au déploiement
+- Régénérer `PULSE_SECRET_KEY` dans le `.env` du NAS (l'ancienne valeur a circulé comme jeton dans le navigateur).
+- Désactiver ou supprimer les 8 sources Reddit dans l'Admin.
+- Supprimer un jour la sauvegarde `data/pulse-avant-unique-*.db` (~140 Mo) une fois la migration validée.
+
+### Bugs connus
+- Port 8085 publié sur `0.0.0.0` (réseau local et Tailscale) : la règle commune veut `172.17.0.1:8085:80`. Touche le compose.
+- Quelques flux RSS renvoient 0 article au premier passage (L'IA du Capitaine, Génération IA, TLDR AI) : à vérifier.
+- Filtre « Aujourd'hui » des Sauvegardés : décalage UTC (inchangé).
+
+---
 ## Session 4 — 08/11/2026 — [claude] Migration vers Le Déclic 1.21.0
 
 ### Ce qui a été fait
@@ -83,3 +117,4 @@ Puis : itérations sur retours utilisateur MVP.
 - Custom feeds Bluesky communautaires (starter packs)
 - Statistiques détaillées par source dans l'admin (graphe d'activité)
 - Recherche full-text dans le feed
+- Bouton Tester d'une nouvelle source : tester sans créer de source temporaire (route d'essai dédiée)

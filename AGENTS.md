@@ -1,9 +1,9 @@
 # Pulse
 
-Agrégateur de veille tech personnel. Centralise des flux RSS, posts Bluesky, subreddits et chaînes YouTube dans une interface mobile-first unifiée. 5 onglets thématiques : IA Produit/PM, UX & Product, Tech général, Hardware & Actu, Vidéo.
+Agrégateur de veille tech personnel. Centralise des flux RSS, posts Bluesky et chaînes YouTube (Reddit retiré le 16/11/2026) dans une interface mobile-first unifiée. 5 onglets thématiques : IA Produit/PM, UX & Product, Tech général, Hardware & Actu, Vidéo.
 
 Projet 2AM Studio — développeur solo : Julien LAMBS.
-Repo : `julienlambs/pulse`
+Repo : `julienlambs/pulse` (MIT ; prêt à devenir public, voir journal du 16/11/2026)
 Déployé sur NAS Synology via Docker, accessible sur `pulse.julienlambs.dev`.
 
 Ce fichier est la mémoire partagée du projet, lue par les deux agents qui travaillent dessus : qwen-code (le lit nativement) et Claude Code (l'importe via `@AGENTS.md` depuis son propre `CLAUDE.md`). Les deux doivent suivre les instructions ci-dessous et dans les fichiers importés — et les deux peuvent les mettre à jour (voir protocole journal dans `rules.md`).
@@ -40,7 +40,8 @@ Ce fichier est la mémoire partagée du projet, lue par les deux agents qui trav
 - Toujours lister les fichiers qui vont être modifiés avant d'agir.
 - `src/index.css` et `src/fonts/` sont des **copies** de la charte (`D:/Projets/design-system/`) : ne pas les retoucher à la main, les recopier depuis la charte à chaque mise à jour (version notée en tête d'`index.css`). Le CSS propre à Pulse va dans `src/app.css`.
 - Composants : ceux du paquet `@declic/ui` (`frontend/vendor/declic-ui-<version>.tgz`), jamais de copie locale ni de retouche dans `node_modules`. Thème : `useTheme()` du paquet.
-- Toujours vérifier `external_id` avant d'insérer un item en base pour éviter les doublons.
+- Toujours vérifier `external_id` avant d'insérer un item en base (évite de télécharger un contenu déjà présent), puis insérer par `fetchers.insert_item` : la contrainte UNIQUE `(source_id, external_id)` ignore un doublon.
+- Tests backend : `cd backend && pytest` (dépendances : `requirements-dev.txt`). Les lancer avant chaque commit backend.
 
 ---
 

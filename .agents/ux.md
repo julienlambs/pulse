@@ -185,7 +185,7 @@ Ouvre le formulaire d'ajout de source en bottom sheet.
 
 Champs :
 - Nom (texte)
-- Type (select : RSS / Reddit / Bluesky / YouTube)
+- Type (select : RSS / Bluesky / YouTube ; Reddit retiré le 16/11/2026, affiché seulement pour une ancienne source)
 - URL ou handle
 - Onglet de destination (select : IA / UX / Tech / Hardware / Vidéo)
 - Mots-clés de filtrage (texte, optionnel, séparés par virgules)

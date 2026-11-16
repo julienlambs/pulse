@@ -2,19 +2,18 @@
 
 ## Vue d'ensemble
 
-Pulse est un agrégateur de veille personnel. Un backend FastAPI ingère des sources hétérogènes (RSS, Reddit, Bluesky, YouTube) toutes les heures, stocke les articles en SQLite, et expose une API REST consommée par un frontend React mobile-first.
+Pulse est un agrégateur de veille personnel. Un backend FastAPI ingère des sources hétérogènes (RSS, Bluesky, YouTube) toutes les heures, stocke les articles en SQLite, et expose une API REST consommée par un frontend React mobile-first.
 
 ```
 Sources externes
-(RSS / Reddit / Bluesky / YouTube)
+(RSS / Bluesky / YouTube)
         │
         ▼
   APScheduler (toutes les heures)
         │
         ▼
-  Ingesteurs par type
+  Ingesteurs par type (aiguillage : fetchers.run_fetcher)
   ├── rss_fetcher.py      (feedparser + readability-lxml)
-  ├── reddit_fetcher.py   (flux RSS natif Reddit)
   ├── bluesky_fetcher.py  (API AT Protocol publique)
   └── youtube_fetcher.py  (flux RSS natif YouTube)
         │
@@ -55,7 +54,7 @@ Sources externes
 |---|---|---|
 | `id` | INTEGER PK | Auto-increment |
 | `name` | TEXT | Nom affiché ex: "Lenny's Newsletter" |
-| `type` | TEXT | rss / reddit / bluesky / youtube |
+| `type` | TEXT | rss / bluesky / youtube (`reddit` : ancien type, retiré le 16/11/2026, n'est plus collecté) |
 | `url` | TEXT | URL du flux ou handle Bluesky |
 | `tab` | TEXT | ai_product / ux_product / tech / hardware / video |
 | `keywords` | TEXT | JSON array de mots-clés pour filtrage optionnel |
@@ -86,11 +85,15 @@ Sources externes
 | `is_saved` | BOOLEAN | Sauvegardé, défaut false |
 | `external_id` | TEXT | ID unique côté source, sert à éviter les doublons |
 
+Index UNIQUE `uq_items_source_external` sur `(source_id, external_id)` (16/11/2026). Sur une base plus ancienne,
+`database.migrate_unique_items` le pose au démarrage, une seule fois : sauvegarde `pulse-avant-unique-AAAAMMJJ.db`
+à côté de la base, fusion des doublons, création de l'index. Supprimer une source supprime ses articles non sauvegardés.
+
 ---
 
 ## Flux d'ingestion
 
-### RSS et Reddit (même ingesteur)
+### RSS
 
 ```
 1. Fetch du flux via feedparser
@@ -106,11 +109,14 @@ Sources externes
 ### Bluesky
 
 ```
-1. Appel API AT Protocol publique (pas de clé nécessaire pour lecture publique)
-2. Récupération des posts des comptes configurés
+1. Appel API AT Protocol publique `app.bsky.feed.getAuthorFeed` (pas de clé), `filter=posts_no_replies`
+2. Posts et reposts du compte ; pour un repost, auteur et lien sont ceux du post d'origine
 3. Vérification external_id (uri du post)
-4. Détection langue
-5. Insertion en base (content = texte natif du post, pas de fetch externe)
+4. Mots-clés à inclure / exclure (même filtre que le RSS : fetchers.keyword_filter)
+5. Langue : champ `langs` du post, détection seulement à défaut
+6. Insertion en base (content = texte natif du post, pas de fetch externe)
+
+Un compte inactif donne 0 article : la purge à 30 jours efface les vieux posts.
 ```
 
 ### YouTube
@@ -169,9 +175,14 @@ PATCH  /api/sources/{id}/toggle
 
 ```
 POST /api/auth/login
-     Body : { "password": "..." }
-     Retourne : { "token": "..." }
-     Token stocké en localStorage côté frontend
+     Body : { "password": "..." }  (texte, 1 à 128 caractères)
+     Retourne : { "token": "...", "expires_at": <secondes Unix> }
+     Jeton signé HMAC-SHA256 (auth.py), valable PULSE_TOKEN_TTL_DAYS jours (30), stocké en localStorage.
+     Tout 401 vide le jeton et renvoie à l'écran de connexion (lib/api.js, événement pulse:logout).
+     Limite : 5 échecs / 15 min par IP (CF-Connecting-IP), 50 toutes IP, puis 429 + Retry-After ; 1 s de pause par échec.
+
+Toutes les routes /api demandent le jeton, sauf /api/auth/login et /api/health (vérifié par tests/test_auth.py).
+CORS : https://pulse.julienlambs.dev et http://localhost:5173 (PULSE_ALLOWED_ORIGINS). /docs coupé (PULSE_ENABLE_DOCS=1).
 ```
 
 ### Trigger manuel (admin)
@@ -204,14 +215,15 @@ pulse/
 │   ├── main.py             Point d'entrée FastAPI + scheduler
 │   ├── database.py         Connexion SQLite + init tables
 │   ├── models.py           Modèles SQLAlchemy
-│   ├── auth.py             Vérification token
+│   ├── auth.py             Jeton signé : création, vérification
+│   ├── tests/              pytest (requirements-dev.txt)
 │   ├── routers/
 │   │   ├── items.py
 │   │   ├── sources.py
 │   │   └── auth.py
 │   └── fetchers/
+│       ├── __init__.py     run_fetcher, insert_item, keyword_filter
 │       ├── rss_fetcher.py
-│       ├── reddit_fetcher.py
 │       ├── bluesky_fetcher.py
 │       └── youtube_fetcher.py
 │
@@ -257,7 +269,9 @@ pulse/
 ## Variables d'environnement (.env)
 
 ```
-PULSE_SECRET_KEY=          # token de login app
+PULSE_PASSWORD_HASH=       # hash bcrypt du mot de passe
+PULSE_SECRET_KEY=          # clé de signature des jetons (≥ 32 caractères), reste sur le serveur
+PULSE_TOKEN_TTL_DAYS=30    # durée du jeton
 DATABASE_URL=              # chemin SQLite ex: /data/pulse.db
 FETCH_INTERVAL_MINUTES=60  # fréquence de refresh des sources
 RETENTION_DAYS=30          # durée de rétention des articles non sauvegardés
@@ -282,5 +296,5 @@ Domaine : `pulse.julienlambs.dev` via Cloudflare Tunnel, route `http://172.17.0.
 
 ## CI/CD
 
-Push sur `main` → GitHub Actions `docker-publish.yml` → build + push GHCR → script SSH de déploiement sur le NAS.
+Push sur `master` → GitHub Actions `docker-publish.yml` → build + push GHCR. Le NAS tire les images chaque jour à 6 h (tâche planifiée Synology), ou à la main.
 Repo : `julienlambs/pulse`
