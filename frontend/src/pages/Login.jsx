@@ -17,6 +17,11 @@ export default function Login({ onLogin }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password }),
       })
+      if (r.status === 429) {
+        const minutes = Math.max(1, Math.ceil(Number(r.headers.get('Retry-After') || 60) / 60))
+        setError(`Trop de tentatives. Réessaie dans ${minutes} min.`)
+        return
+      }
       if (!r.ok) { setError('Mot de passe incorrect'); return }
       const { token } = await r.json()
       localStorage.setItem('pulse_token', token)
