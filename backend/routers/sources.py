@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from auth import require_auth
 from database import get_db
+from fetchers import run_fetcher
 from models import Source
 
 router = APIRouter(prefix="/api/sources", tags=["sources"])
@@ -27,19 +28,6 @@ def _source_to_dict(source: Source):
         "last_fetch_count": source.last_fetch_count,
         "last_fetch_error": source.last_fetch_error,
     }
-
-
-def _run_fetcher(source, db):
-    if source.type in ("rss", "reddit"):
-        from fetchers.rss_fetcher import fetch_rss
-        return fetch_rss(source, db)
-    elif source.type == "youtube":
-        from fetchers.youtube_fetcher import fetch_youtube
-        return fetch_youtube(source, db)
-    elif source.type == "bluesky":
-        from fetchers.bluesky_fetcher import fetch_bluesky
-        return fetch_bluesky(source, db)
-    return 0, f"Unknown source type: {source.type}"
 
 
 @router.get("", dependencies=[Depends(require_auth)])
@@ -112,7 +100,7 @@ def trigger_fetch(source_id: int, db: Session = Depends(get_db)):
     source = db.query(Source).filter(Source.id == source_id).first()
     if not source:
         raise HTTPException(status_code=404, detail="Source not found")
-    count, error = _run_fetcher(source, db)
+    count, error = run_fetcher(source, db)
     source.last_fetched_at = datetime.utcnow()
     source.last_fetch_count = count
     source.last_fetch_error = error

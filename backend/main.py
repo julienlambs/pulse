@@ -12,25 +12,13 @@ load_dotenv()
 
 import models  # noqa — enregistre les modèles avant init_db
 from database import SessionLocal, init_db
+from fetchers import run_fetcher
 from models import Item, Source
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger("pulse")
 
 scheduler = BackgroundScheduler()
-
-
-def _run_fetcher(source, db):
-    if source.type in ("rss", "reddit"):
-        from fetchers.rss_fetcher import fetch_rss
-        return fetch_rss(source, db)
-    elif source.type == "youtube":
-        from fetchers.youtube_fetcher import fetch_youtube
-        return fetch_youtube(source, db)
-    elif source.type == "bluesky":
-        from fetchers.bluesky_fetcher import fetch_bluesky
-        return fetch_bluesky(source, db)
-    return 0, f"Unknown type: {source.type}"
 
 
 def fetch_all_sources():
@@ -40,7 +28,7 @@ def fetch_all_sources():
         logger.info(f"Scheduler: fetching {len(sources)} active sources")
         for source in sources:
             try:
-                count, error = _run_fetcher(source, db)
+                count, error = run_fetcher(source, db)
                 source.last_fetched_at = datetime.utcnow()
                 source.last_fetch_count = count
                 source.last_fetch_error = error

@@ -9,7 +9,6 @@ const LANGS = [
 
 const SOURCE_TYPES = [
   { id: 'rss',     label: 'RSS' },
-  { id: 'reddit',  label: 'Reddit' },
   { id: 'bluesky', label: 'Bluesky' },
   { id: 'youtube', label: 'YouTube' },
 ]

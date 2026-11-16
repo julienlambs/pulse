@@ -3,7 +3,8 @@ import { createPortal } from 'react-dom'
 import { Banniere, Btn, Field, Reveal, SelectField, useSurface } from '@declic/ui'
 import { apiFetch } from '../../lib/api'
 
-const TYPES = ['rss', 'reddit', 'bluesky', 'youtube']
+// Reddit retiré le 16/11/2026 (flux bloqués) : reste affiché seulement pour une ancienne source
+const TYPES = ['rss', 'bluesky', 'youtube']
 const TYPE_LABELS = { rss: 'RSS', reddit: 'Reddit', bluesky: 'Bluesky', youtube: 'YouTube' }
 const TABS  = [
   { id: 'ai_product', label: 'IA Produit' },
@@ -141,7 +142,7 @@ export default function SourceForm({ open, source, token, onSave, onClose }) {
 
               <div className="source-form-ligne">
                 <SelectField id="source-type" label="Type" value={form.type} onChange={e => set('type', e.target.value)} data-menu="">
-                  {TYPES.map(t => <option key={t} value={t}>{TYPE_LABELS[t]}</option>)}
+                  {(TYPES.includes(form.type) ? TYPES : [...TYPES, form.type]).map(t => <option key={t} value={t}>{TYPE_LABELS[t]}</option>)}
                 </SelectField>
                 <SelectField id="source-langue" label="Langue" value={form.lang_filter} onChange={e => set('lang_filter', e.target.value)} data-menu="">
                   {LANGS.map(l => <option key={l.id} value={l.id}>{l.label}</option>)}
