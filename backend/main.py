@@ -90,14 +90,30 @@ async def lifespan(app: FastAPI):
     scheduler.shutdown()
 
 
-app = FastAPI(title="Pulse API", lifespan=lifespan)
+_docs = os.getenv("PULSE_ENABLE_DOCS") == "1"  # doc interactive /docs, à n'activer qu'en local
+app = FastAPI(
+    title="Pulse API",
+    lifespan=lifespan,
+    docs_url="/docs" if _docs else None,
+    redoc_url=None,
+    openapi_url="/openapi.json" if _docs else None,
+)
 
+# L'app passe par le même domaine (proxy nginx en prod, proxy Vite en dev) : CORS ne sert
+# qu'à un appel direct depuis une autre origine, limité à celles-ci.
+ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        "PULSE_ALLOWED_ORIGINS", "https://pulse.julienlambs.dev,http://localhost:5173"
+    ).split(",")
+    if origin.strip()
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=False,  # jeton Bearer, pas de cookie
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 from routers import items, sources  # noqa — après création de l'app
