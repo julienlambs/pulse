@@ -35,3 +35,6 @@ _archive/
 
 # Deploy scripts (local only)
 *.bat
+
+# Tests
+.pytest_cache/

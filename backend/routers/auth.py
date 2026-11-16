@@ -1,17 +1,24 @@
 import os
+
 import bcrypt
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, Field
+
+from auth import create_token
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
+class LoginBody(BaseModel):
+    password: str = Field(min_length=1, max_length=128)
+
+
 @router.post("/login")
-def login(body: dict):
+def login(body: LoginBody):
     password_hash = os.getenv("PULSE_PASSWORD_HASH", "")
-    secret_key    = os.getenv("PULSE_SECRET_KEY", "")
-    if not password_hash or not secret_key:
+    if not password_hash or not os.getenv("PULSE_SECRET_KEY", ""):
         raise HTTPException(status_code=500, detail="Auth not configured")
-    password = body.get("password", "")
-    if not bcrypt.checkpw(password.encode(), password_hash.encode()):
+    if not bcrypt.checkpw(body.password.encode(), password_hash.encode()):
         raise HTTPException(status_code=401, detail="Mot de passe incorrect")
-    return {"token": secret_key}
+    token, expires_at = create_token()
+    return {"token": token, "expires_at": expires_at}

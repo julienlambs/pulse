@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTheme, useViseurFocus, SphinxBackground } from '@declic/ui'
-import { apiFetch } from './lib/api'
+import { apiFetch, LOGOUT_EVENT } from './lib/api'
 import Header from './components/layout/Header'
 import BottomNav, { MenuOnglets } from './components/layout/BottomNav'
 import FeedTab from './components/feed/FeedTab'
@@ -21,6 +21,13 @@ export default function App() {
   const [savedOverrides, setSavedOverrides] = useState({})
   const mainRef      = useRef(null)
   const scrollPosRef = useRef(0)
+
+  // Jeton expiré ou refusé par l'API (401) : retour à l'écran de connexion
+  useEffect(() => {
+    const onExpired = () => setAuthToken(null)
+    window.addEventListener(LOGOUT_EVENT, onExpired)
+    return () => window.removeEventListener(LOGOUT_EVENT, onExpired)
+  }, [])
 
   useEffect(() => {
     if (!authToken) return
