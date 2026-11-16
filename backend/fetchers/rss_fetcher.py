@@ -1,4 +1,3 @@
-import json
 import logging
 from datetime import datetime
 from html.parser import HTMLParser
@@ -7,7 +6,7 @@ import feedparser
 import httpx
 from langdetect import detect, LangDetectException
 
-from fetchers import insert_item
+from fetchers import insert_item, keyword_filter
 
 logger = logging.getLogger("pulse.rss")
 
@@ -93,19 +92,7 @@ def fetch_rss(source, db):
         if feed.bozo and not feed.entries:
             return 0, f"Feed parse error: {feed.bozo_exception}"
 
-        keywords = []
-        if source.keywords:
-            try:
-                keywords = json.loads(source.keywords)
-            except Exception:
-                pass
-
-        exclude_keywords = []
-        if source.exclude_keywords:
-            try:
-                exclude_keywords = json.loads(source.exclude_keywords)
-            except Exception:
-                pass
+        keep = keyword_filter(source)
 
         count = 0
         for entry in feed.entries:
@@ -131,15 +118,8 @@ def fetch_rss(source, db):
             )
             summary = _strip_html(raw_summary)[:600]
 
-            text_lower = (title + " " + summary).lower()
-
-            if keywords:
-                if not any(kw.lower() in text_lower for kw in keywords):
-                    continue
-
-            if exclude_keywords:
-                if any(kw.lower() in text_lower for kw in exclude_keywords):
-                    continue
+            if not keep(title + " " + summary):
+                continue
 
             lang = _detect_lang(title + " " + summary)
 

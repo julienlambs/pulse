@@ -1,4 +1,33 @@
+import json
+
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+
+
+def _keyword_list(raw):
+    if not raw:
+        return []
+    try:
+        return [str(kw).lower() for kw in json.loads(raw) if str(kw).strip()]
+    except (ValueError, TypeError):
+        return []
+
+
+def keyword_filter(source):
+    """Renvoie une fonction texte -> bool : vrai si le texte passe les mots-clés de la source.
+
+    `keywords` : au moins un doit apparaître (si la liste est vide, tout passe).
+    `exclude_keywords` : aucun ne doit apparaître.
+    """
+    include = _keyword_list(source.keywords)
+    exclude = _keyword_list(source.exclude_keywords)
+
+    def keep(text):
+        lowered = text.lower()
+        if include and not any(kw in lowered for kw in include):
+            return False
+        return not any(kw in lowered for kw in exclude)
+
+    return keep
 
 
 def insert_item(db, **values) -> bool:

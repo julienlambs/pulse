@@ -57,7 +57,10 @@ export default function SourceForm({ open, source, token, onSave, onClose }) {
           headers: { Authorization: `Bearer ${token}` },
         })
         const data = await r.json()
-        setTestResult(data.error ? `Erreur : ${data.error}` : `${data.count} nouveaux articles`)
+        setTestResult(data.error ? `Erreur : ${data.error}`
+          : data.count === 0
+            ? 'La source répond : aucun nouvel article, tout est déjà dans Pulse.'
+            : `${data.count} nouvel${data.count > 1 ? 's' : ''} article${data.count > 1 ? 's' : ''}`)
       } else {
         // Créer temporairement et tester — on teste en créant une source temporaire
         const r = await apiFetch('/api/sources', {

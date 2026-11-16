@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from auth import require_auth
 from database import get_db
 from fetchers import run_fetcher
-from models import Source
+from models import Item, Source
 
 router = APIRouter(prefix="/api/sources", tags=["sources"])
 logger = logging.getLogger("pulse.sources")
@@ -80,6 +80,8 @@ def delete_source(source_id: int, db: Session = Depends(get_db)):
     source = db.query(Source).filter(Source.id == source_id).first()
     if not source:
         raise HTTPException(status_code=404, detail="Source not found")
+    # Ses articles non sauvegardés partent avec elle (sinon ils restent dans le flux, sans source)
+    db.query(Item).filter(Item.source_id == source_id, Item.is_saved == False).delete()  # noqa: E712
     db.delete(source)
     db.commit()
     return {"ok": True}
